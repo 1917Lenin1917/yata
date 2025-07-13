@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/prisma/src/prisma
+
+# Serwist
+public/sw*
+public/swe-worker*
+
+# ide
+.idea
+
+# db
+*.sqlite3

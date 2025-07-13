@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1752173307746,
+      "tag": "0000_legal_matthew_murdock",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1752173357598,
+      "tag": "0001_crazy_puff_adder",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1752266128723,
+      "tag": "0002_loving_slapstick",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1752352000574,
+      "tag": "0003_lively_reaper",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1752352768729,
+      "tag": "0004_flawless_karma",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1752441371048,
+      "tag": "0005_chilly_sabra",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1752441389453,
+      "tag": "0006_dapper_quentin_quire",
+      "breakpoints": true
+    }
+  ]
+}
