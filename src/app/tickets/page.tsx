@@ -1,6 +1,10 @@
 "use client";
 
-import { changeTicketStatus, getTickets } from "@/services/ticket";
+import {
+  changeTicketStatus,
+  createTicket,
+  getTickets,
+} from "@/services/ticket";
 import TicketCard from "@/components/TicketCard";
 import {
   DndContext,
@@ -12,6 +16,9 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Ticket } from "@/types/ticket";
 import TicketStack from "@/components/TicketStack";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +31,7 @@ export default function TicketList() {
 
   const onTicketUpdated = useCallback(() => {
     getTickets().then(setTickets);
-  }, [setTickets]);
+  }, []);
 
   useEffect(() => {
     getTickets().then(setTickets);
@@ -41,9 +48,9 @@ export default function TicketList() {
       ),
     [tickets],
   );
-  const pendingTickets = useMemo(
-    () =>
-      ticketsGrouppedByStatus["PENDING"].map((ticket, idx) => (
+  const mapTickets = useCallback(
+    (ticketList: Ticket[]) =>
+      ticketList.map((ticket, idx) => (
         <TicketCard
           className={"cursor-pointer"}
           key={idx}
@@ -51,31 +58,20 @@ export default function TicketList() {
           onTicketUpdated={onTicketUpdated}
         ></TicketCard>
       )),
-    [ticketsGrouppedByStatus, onTicketUpdated],
+    [onTicketUpdated],
+  );
+
+  const pendingTickets = useMemo(
+    () => mapTickets(ticketsGrouppedByStatus["PENDING"]),
+    [ticketsGrouppedByStatus, mapTickets],
   );
   const activeTickets = useMemo(
-    () =>
-      ticketsGrouppedByStatus["IN_PROGRESS"].map((ticket, idx) => (
-        <TicketCard
-          className={"cursor-pointer"}
-          key={idx}
-          ticket={ticket}
-          onTicketUpdated={onTicketUpdated}
-        ></TicketCard>
-      )),
-    [ticketsGrouppedByStatus, onTicketUpdated],
+    () => mapTickets(ticketsGrouppedByStatus["IN_PROGRESS"]),
+    [ticketsGrouppedByStatus, mapTickets],
   );
   const doneTickets = useMemo(
-    () =>
-      ticketsGrouppedByStatus["DONE"].map((ticket, idx) => (
-        <TicketCard
-          className={"cursor-pointer"}
-          key={idx}
-          ticket={ticket}
-          onTicketUpdated={onTicketUpdated}
-        ></TicketCard>
-      )),
-    [ticketsGrouppedByStatus, onTicketUpdated],
+    () => mapTickets(ticketsGrouppedByStatus["DONE"]),
+    [ticketsGrouppedByStatus, mapTickets],
   );
 
   const handleDragOver = useCallback(
@@ -94,12 +90,45 @@ export default function TicketList() {
     [onTicketUpdated, tickets, setTickets],
   );
 
+  const createNewTicket = useCallback(
+    (status: Ticket["status"]) => {
+      createTicket({
+        authorId: 1, // TODO: add auth!
+        title: "",
+        date: new Date().toISOString(),
+        desc: "",
+        status,
+      }).then(onTicketUpdated);
+    },
+    [onTicketUpdated],
+  );
+
   return (
     <DndContext onDragEnd={handleDragOver} sensors={sensors}>
       <div className={"p-8 flex flex-row gap-4 h-full"}>
-        <TicketStack status={"PENDING"}>{pendingTickets}</TicketStack>
-        <TicketStack status={"IN_PROGRESS"}>{activeTickets}</TicketStack>
-        <TicketStack status={"DONE"}>{doneTickets}</TicketStack>
+        <TicketStack status={"PENDING"}>
+          {pendingTickets}
+          <Button onClick={() => createNewTicket("PENDING")} className={"mt-4"}>
+            <Plus /> Create a new ticket
+          </Button>
+        </TicketStack>
+        <Separator orientation={"vertical"} />
+        <TicketStack status={"IN_PROGRESS"}>
+          {activeTickets}
+          <Button
+            onClick={() => createNewTicket("IN_PROGRESS")}
+            className={"mt-4"}
+          >
+            <Plus /> Create a new ticket
+          </Button>
+        </TicketStack>
+        <Separator orientation={"vertical"} />
+        <TicketStack status={"DONE"}>
+          {doneTickets}
+          <Button onClick={() => createNewTicket("DONE")} className={"mt-4"}>
+            <Plus /> Create a new ticket
+          </Button>
+        </TicketStack>
       </div>
     </DndContext>
   );

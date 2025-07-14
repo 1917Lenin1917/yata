@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Ticket } from "@/types/ticket";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatter, formatUser, getInitials } from "@/utils";
@@ -15,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { useMemo, useState } from "react";
 import TicketModal from "@/components/TicketModal";
 import { useDraggable } from "@dnd-kit/core";
+import { useTicketStatus } from "@/hooks/useTicketStatus";
 
 interface Props {
   ticket: Ticket;
@@ -39,27 +34,35 @@ export default function TicketCard({ ticket, className, ...props }: Props) {
     () => formatter.format(new Date(ticket.publishedDate)),
     [ticket],
   );
+  const badgeParams = useTicketStatus(ticket.status);
+
   return (
     <>
       <Card
         onClick={() => setIsOpen(true)}
-        className={cn("py-4 gap-2 max-w-[400px]", className)}
+        className={cn("py-4 gap-2 max-w-[250px]", className)}
         ref={setNodeRef}
         style={style}
         {...listeners}
         {...attributes}
       >
         <CardHeader>
-          <CardTitle>{ticket.title}</CardTitle>
+          <CardTitle
+            className={cn(
+              "mb-2",
+              ticket.title ? "text-primary" : "text-muted-foreground",
+            )}
+          >
+            {ticket.title || "No title"}
+          </CardTitle>
           <div className={"flex gap-1"}>
-            <Badge className={"bg-blue-400"}>PENDING</Badge>
+            <Badge className={badgeParams.className}>
+              {badgeParams.icon} {badgeParams.text}
+            </Badge>
             <Badge className={"bg-purple-700 text-primary"}>WORK</Badge>
             <Badge className={"bg-red-400"}>HIGH</Badge>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className={"truncate"}>{ticket.description}</div>
-        </CardContent>
         <CardFooter className={"gap-1"}>
           <Avatar>
             <AvatarImage src={"https://cataas.com/cat"} />

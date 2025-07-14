@@ -46,9 +46,9 @@ export const deleteTicket = async (ticketId: number) => {
 interface CreateTicket {
   title: string;
   desc: string;
-  author: string;
-  date: string;
   authorId: number;
+  date: string;
+  status: Ticket["status"];
 }
 export const createTicket = async (body: CreateTicket) => {
   await db.insert(tickets).values({
@@ -56,6 +56,7 @@ export const createTicket = async (body: CreateTicket) => {
     date: body.date,
     authorId: body.authorId,
     description: body.desc,
+    status: body.status,
   });
 };
 
