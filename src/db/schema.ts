@@ -8,6 +8,7 @@ export const tickets = sqliteTable("ticket", {
   date: text(),
   status: text({ enum: ["PENDING", "IN_PROGRESS", "DONE"] }).default("PENDING"),
   authorId: integer().references(() => users.id),
+  priority: integer(),
 });
 
 export const users = sqliteTable("users", {
