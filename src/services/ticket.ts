@@ -1,10 +1,20 @@
 "use server";
 
 import type { Ticket } from "@/types/ticket";
-import { and, gt, gte, type InferSelectModel, lt, lte, ne, sql } from "drizzle-orm";
+import {
+  and,
+  gt,
+  gte,
+  type InferSelectModel,
+  lt,
+  lte,
+  ne,
+  sql,
+} from "drizzle-orm";
 import { tickets, users } from "@/db/schema";
 import { db } from "@/db/drizzle";
 import { eq } from "drizzle-orm";
+import { auth } from "@/auth";
 
 type DtoTicket = InferSelectModel<typeof tickets>;
 type DtoUser = InferSelectModel<typeof users>;
@@ -26,8 +36,18 @@ const mapDtoToTicket = (
   priority: dto.priority || 0,
 });
 
-export const getTickets = async (): Promise<Ticket[]> => {
-  const data = await db.query.tickets.findMany({ with: { author: true } });
+export const getCurrentUserTickets = async (): Promise<Ticket[]> => {
+  const session = await auth();
+  if (!session?.user?.email) return [];
+
+  const currentUser = await db.query.users.findFirst({
+    where: eq(users.email, session.user.email),
+  });
+
+  const data = await db.query.tickets.findMany({
+    with: { author: true },
+    where: eq(tickets.authorId, currentUser?.id ?? 0),
+  });
   return data.map(mapDtoToTicket);
 };
 
@@ -73,68 +93,77 @@ export const changeTicketTitle = async (ticketId: number, newTitle: string) => {
 export const changeTicketStatus = async (
   ticketId: number,
   newStatus: Ticket["status"],
-  newPriority: number
-) => db.transaction(async (tx) => {
-  // 1. Fetch the ticket’s current position
-  const [current] = await tx
-    .select({ status: tickets.status, priority: tickets.priority })
-    .from(tickets)
-    .where(eq(tickets.id, ticketId));
+  newPriority: number,
+) =>
+  db.transaction(async (tx) => {
+    // 1. Fetch the ticket’s current position
+    const [current] = await tx
+      .select({ status: tickets.status, priority: tickets.priority })
+      .from(tickets)
+      .where(eq(tickets.id, ticketId));
 
-  if (!current) throw new Error('Ticket not found');
-  const { status: oldStatus, priority: oldPriority } = current;
+    if (!current) throw new Error("Ticket not found");
+    const { status: oldStatus, priority: oldPriority } = current;
 
-  // 2. Close the gap we’ll leave *if* we’re exiting the old column
-  if (oldStatus !== newStatus) {
-    await tx
-      .update(tickets)
-      .set({ priority: sql`${tickets.priority} - 1` })
-      .where(and(
-        eq(tickets.status, oldStatus!),
-        gt(tickets.priority, oldPriority!),
-      ));
-  }
-
-  // 3. Make room in the target column
-  if (oldStatus === newStatus) {
-    // Re‑ordering inside the same column
-    if (newPriority < oldPriority!) {
-      // Moving up: bump everything in [new, old‑1] down by 1
-      await tx
-        .update(tickets)
-        .set({ priority: sql`${tickets.priority} + 1` })
-        .where(and(
-          eq(tickets.status, newStatus),
-          gte(tickets.priority, newPriority),
-          lt(tickets.priority,  oldPriority!),
-          ne(tickets.id, ticketId),
-        ));
-    } else if (newPriority > oldPriority!) {
-      // Moving down: pull everything in (old, new] up by 1
+    // 2. Close the gap we’ll leave *if* we’re exiting the old column
+    if (oldStatus !== newStatus) {
       await tx
         .update(tickets)
         .set({ priority: sql`${tickets.priority} - 1` })
-        .where(and(
-          eq(tickets.status, newStatus),
-          lte(tickets.priority, newPriority),
-          gt(tickets.priority,  oldPriority!),
-          ne(tickets.id, ticketId),
-        ));
+        .where(
+          and(
+            eq(tickets.status, oldStatus!),
+            gt(tickets.priority, oldPriority!),
+          ),
+        );
     }
-  } else {
-    // Entering a different column: bump everything ≥ newPriority
+
+    // 3. Make room in the target column
+    if (oldStatus === newStatus) {
+      // Re‑ordering inside the same column
+      if (newPriority < oldPriority!) {
+        // Moving up: bump everything in [new, old‑1] down by 1
+        await tx
+          .update(tickets)
+          .set({ priority: sql`${tickets.priority} + 1` })
+          .where(
+            and(
+              eq(tickets.status, newStatus),
+              gte(tickets.priority, newPriority),
+              lt(tickets.priority, oldPriority!),
+              ne(tickets.id, ticketId),
+            ),
+          );
+      } else if (newPriority > oldPriority!) {
+        // Moving down: pull everything in (old, new] up by 1
+        await tx
+          .update(tickets)
+          .set({ priority: sql`${tickets.priority} - 1` })
+          .where(
+            and(
+              eq(tickets.status, newStatus),
+              lte(tickets.priority, newPriority),
+              gt(tickets.priority, oldPriority!),
+              ne(tickets.id, ticketId),
+            ),
+          );
+      }
+    } else {
+      // Entering a different column: bump everything ≥ newPriority
+      await tx
+        .update(tickets)
+        .set({ priority: sql`${tickets.priority} + 1` })
+        .where(
+          and(
+            eq(tickets.status, newStatus),
+            gte(tickets.priority, newPriority),
+          ),
+        );
+    }
+
+    // 4. Finally park the ticket in its new spot
     await tx
       .update(tickets)
-      .set({ priority: sql`${tickets.priority} + 1` })
-      .where(and(
-        eq(tickets.status, newStatus),
-        gte(tickets.priority, newPriority),
-      ));
-  }
-
-  // 4. Finally park the ticket in its new spot
-  await tx
-    .update(tickets)
-    .set({ status: newStatus, priority: newPriority })
-    .where(eq(tickets.id, ticketId));
-});
+      .set({ status: newStatus, priority: newPriority })
+      .where(eq(tickets.id, ticketId));
+  });

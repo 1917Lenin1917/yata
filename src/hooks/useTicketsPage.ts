@@ -5,7 +5,7 @@ import type {
   DragOverEvent,
   DragStartEvent,
 } from "@dnd-kit/core";
-import { changeTicketStatus, getTickets } from "@/services/ticket";
+import { changeTicketStatus, getCurrentUserTickets } from "@/services/ticket";
 
 export const useTicketsPage = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -83,7 +83,7 @@ export const useTicketsPage = () => {
   );
 
   const onTicketUpdated = useCallback(() => {
-    getTickets().then(setTickets);
+    getCurrentUserTickets().then(setTickets);
   }, []);
 
   const handleDragStart = useCallback(

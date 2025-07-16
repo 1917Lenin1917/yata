@@ -1,6 +1,6 @@
 "use client";
 
-import { getTickets } from "@/services/ticket";
+import { getCurrentUserTickets } from "@/services/ticket";
 import TicketCard from "@/components/TicketCard";
 import {
   closestCorners,
@@ -30,7 +30,7 @@ export default function TicketList() {
   );
 
   useEffect(() => {
-    getTickets().then(setTickets);
+    getCurrentUserTickets().then(setTickets);
   }, [setTickets]);
 
   return (

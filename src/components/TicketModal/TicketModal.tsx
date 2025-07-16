@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/dialog";
 import type { Ticket } from "@/types/ticket";
 import { useEffect, useState } from "react";
-import { DialogBody } from "next/dist/client/components/react-dev-overlay/ui/components/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -57,7 +56,7 @@ export default function TicketModal({
         <DialogHeader>
           <DialogTitle></DialogTitle>
         </DialogHeader>
-        <DialogBody className={"min-h-[300px] flex flex-col gap-8"}>
+        <div className={"min-h-[300px] flex flex-col gap-8"}>
           <Input
             className={"border-none bg-background! ring-0! text-3xl! h-10!"}
             value={title}
@@ -87,7 +86,7 @@ export default function TicketModal({
             onChange={(e) => setDescription(e.target.value)}
             placeholder={"No description"}
           ></Textarea>
-        </DialogBody>
+        </div>
       </DialogContent>
     </Dialog>
   );
