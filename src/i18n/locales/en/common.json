@@ -1,0 +1,9 @@
+{
+  "common": {
+    "ticket": {
+      "no_title": "No title",
+      "create": "Create a new ticket"
+    }
+  }
+
+}

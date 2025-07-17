@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import TicketCard from "@/components/TicketCard";
 import { createTicket } from "@/services/ticket";
+import { useI18n } from "@/hooks/useI18n";
 
 interface Props {
   status: Ticket["status"];
@@ -31,6 +32,8 @@ export default function TicketStack({
     id: `stack-${status}`,
     data: { status },
   });
+
+  const { t } = useI18n();
 
   const mappedTickets = useMemo(
     () =>
@@ -79,7 +82,7 @@ export default function TicketStack({
         >
           {mappedTickets}
           <Button onClick={() => createNewTicket(status)} className={"mt-4"}>
-            <Plus /> Create a new ticket
+            <Plus /> {t("ticket.create")}
           </Button>
         </div>
       </SortableContext>

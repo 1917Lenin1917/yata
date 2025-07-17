@@ -2,8 +2,7 @@
 
 import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Ticket } from "@/types/ticket";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatter, formatUser, getInitials } from "@/utils";
+import { formatter } from "@/utils";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useMemo, useState } from "react";
@@ -11,6 +10,7 @@ import TicketModal from "@/components/TicketModal";
 import { useTicketStatus } from "@/hooks/useTicketStatus";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
+import { useI18n } from "@/hooks/useI18n";
 
 interface Props {
   isActive?: boolean;
@@ -28,6 +28,8 @@ export default function TicketCard({
 }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: ticket.id, data: { id: ticket.id } });
+
+  const { t } = useI18n();
 
   const [isOpen, setIsOpen] = useState(false);
   const badgeParams = useTicketStatus(ticket.status);
@@ -59,7 +61,7 @@ export default function TicketCard({
                 ticket.title ? "text-primary" : "text-muted-foreground",
               )}
             >
-              {ticket.title || "No title"}
+              {ticket.title || t("ticket.no_title")}
             </CardTitle>
             <div className={"flex gap-1 flex-wrap"}>
               <Badge className={badgeParams.className}>
