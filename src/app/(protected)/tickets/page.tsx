@@ -10,7 +10,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import TicketStack from "@/components/TicketStack";
 import { useTicketsPage } from "@/hooks/useTicketsPage";
 
@@ -33,6 +33,19 @@ export default function TicketList() {
     getCurrentUserTickets().then(setTickets);
   }, [setTickets]);
 
+  const sortedPending = useMemo(
+    () => groupedTickets["PENDING"].sort((a, b) => a.priority - b.priority),
+    [groupedTickets],
+  );
+  const sortedActive = useMemo(
+    () => groupedTickets["IN_PROGRESS"].sort((a, b) => a.priority - b.priority),
+    [groupedTickets],
+  );
+  const sortedDone = useMemo(
+    () => groupedTickets["DONE"].sort((a, b) => a.priority - b.priority),
+    [groupedTickets],
+  );
+
   return (
     <DndContext
       sensors={sensors}
@@ -45,25 +58,19 @@ export default function TicketList() {
         <TicketStack
           activeTicket={activeTicket}
           onTicketUpdated={onTicketUpdated}
-          tickets={groupedTickets["PENDING"].sort(
-            (a, b) => a.priority - b.priority,
-          )}
+          tickets={sortedPending}
           status={"PENDING"}
         ></TicketStack>
         <TicketStack
           activeTicket={activeTicket}
           onTicketUpdated={onTicketUpdated}
-          tickets={groupedTickets["IN_PROGRESS"].sort(
-            (a, b) => a.priority - b.priority,
-          )}
+          tickets={sortedActive}
           status={"IN_PROGRESS"}
         ></TicketStack>
         <TicketStack
           activeTicket={activeTicket}
           onTicketUpdated={onTicketUpdated}
-          tickets={groupedTickets["DONE"].sort(
-            (a, b) => a.priority - b.priority,
-          )}
+          tickets={sortedDone}
           status={"DONE"}
         ></TicketStack>
       </div>

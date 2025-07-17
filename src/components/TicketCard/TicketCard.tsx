@@ -50,7 +50,7 @@ export default function TicketCard({
       ) : (
         <Card
           onClick={() => setIsOpen(true)}
-          className={cn("py-4 gap-2 w-[300px] h-[144px]", className)}
+          className={cn("py-4 gap-2 w-[300px]", className)}
         >
           <CardHeader>
             <CardTitle
@@ -69,14 +69,7 @@ export default function TicketCard({
               {/*<Badge className={"bg-red-400"}>HIGH</Badge>*/}
             </div>
           </CardHeader>
-          <CardFooter className={"gap-1"}>
-            <Avatar>
-              <AvatarImage src={"https://cataas.com/cat"} />
-              <AvatarFallback>{getInitials(ticket.author)}</AvatarFallback>
-            </Avatar>
-            {formatUser(ticket.author)} <br />
-            at {date}
-          </CardFooter>
+          <CardFooter>{date}</CardFooter>
         </Card>
       )}
 

@@ -26,8 +26,6 @@ export default function RootLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
-  // const user = (await getCurrentUser()) ?? undefined;
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body

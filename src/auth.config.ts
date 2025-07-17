@@ -8,4 +8,5 @@ export default {
       credentials: { email: {}, password: {} },
     }),
   ],
+  trustHost: true,
 } satisfies NextAuthConfig;

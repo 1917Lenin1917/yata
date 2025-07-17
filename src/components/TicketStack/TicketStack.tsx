@@ -60,7 +60,11 @@ export default function TicketStack({
   );
 
   return (
-    <div className={"grow basis-0 shrink-0 h-full max-w-[calc(300px+16px*2)]"}>
+    <div
+      className={
+        "grow basis-0 shrink-0 min-w-[332px] max-w-[calc(300px+16px*2)]"
+      }
+    >
       <h1 className={"mb-4 text-center text-4xl font-semibold"}>
         {params.text}
       </h1>
@@ -69,16 +73,14 @@ export default function TicketStack({
         items={tickets}
         strategy={verticalListSortingStrategy}
       >
-        <div className={"h-full"}>
-          <div
-            className={"flex flex-col p-4 gap-2 rounded-2xl bg-zinc-800"}
-            ref={setNodeRef}
-          >
-            {mappedTickets}
-            <Button onClick={() => createNewTicket(status)} className={"mt-4"}>
-              <Plus /> Create a new ticket
-            </Button>
-          </div>
+        <div
+          className={"flex flex-col p-4 gap-2 rounded-2xl bg-zinc-800"}
+          ref={setNodeRef}
+        >
+          {mappedTickets}
+          <Button onClick={() => createNewTicket(status)} className={"mt-4"}>
+            <Plus /> Create a new ticket
+          </Button>
         </div>
       </SortableContext>
     </div>

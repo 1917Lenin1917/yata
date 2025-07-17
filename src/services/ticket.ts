@@ -72,12 +72,18 @@ interface CreateTicket {
   status: Ticket["status"];
 }
 export const createTicket = async (body: CreateTicket) => {
+  const highestPrio = await db.query.tickets.findFirst({
+    where: eq(tickets.status, body.status),
+    orderBy: (tickets, { desc }) => [desc(tickets.id)],
+  });
+  console.log(highestPrio);
   await db.insert(tickets).values({
     title: body.title,
     date: body.date,
     authorId: body.authorId,
     description: body.desc,
     status: body.status,
+    priority: (highestPrio?.priority ?? 0) + 1,
   });
 };
 
@@ -96,6 +102,7 @@ export const changeTicketStatus = async (
   newPriority: number,
 ) =>
   db.transaction(async (tx) => {
+    console.log(ticketId, newStatus, newPriority);
     // 1. Fetch the ticket’s current position
     const [current] = await tx
       .select({ status: tickets.status, priority: tickets.priority })
