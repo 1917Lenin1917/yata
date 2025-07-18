@@ -1,6 +1,5 @@
 "use client";
 
-import { getCurrentUserTickets } from "@/services/ticket";
 import TicketCard from "@/components/TicketCard";
 import {
   closestCorners,
@@ -10,11 +9,18 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import TicketStack from "@/components/TicketStack";
 import { useTicketsPage } from "@/hooks/useTicketsPage";
+import type { ProjectWithTickets } from "@/types/project";
+import type { Ticket } from "@/types/ticket";
+import { createTicket } from "@/services/ticket";
 
-export default function TicketList() {
+interface Props {
+  project: ProjectWithTickets;
+}
+
+export default function ProjectPage({ project }: Props) {
   const {
     setTickets,
     activeTicket,
@@ -30,8 +36,8 @@ export default function TicketList() {
   );
 
   useEffect(() => {
-    getCurrentUserTickets().then(setTickets);
-  }, [setTickets]);
+    setTickets(project.tickets);
+  }, [project, setTickets]);
 
   const sortedPending = useMemo(
     () => groupedTickets["PENDING"].sort((a, b) => a.priority - b.priority),
@@ -46,6 +52,19 @@ export default function TicketList() {
     [groupedTickets],
   );
 
+  const createNewTicket = useCallback(
+    (status: Ticket["status"]) => {
+      createTicket({
+        title: "",
+        date: new Date().toISOString(),
+        desc: "",
+        projectId: project.id,
+        status,
+      }).then(onTicketUpdated);
+    },
+    [onTicketUpdated, project],
+  );
+
   return (
     <DndContext
       sensors={sensors}
@@ -56,18 +75,21 @@ export default function TicketList() {
     >
       <div className={"p-8 flex flex-row gap-4 h-full"}>
         <TicketStack
+          createNewTicket={createNewTicket}
           activeTicket={activeTicket}
           onTicketUpdated={onTicketUpdated}
           tickets={sortedPending}
           status={"PENDING"}
         ></TicketStack>
         <TicketStack
+          createNewTicket={createNewTicket}
           activeTicket={activeTicket}
           onTicketUpdated={onTicketUpdated}
           tickets={sortedActive}
           status={"IN_PROGRESS"}
         ></TicketStack>
         <TicketStack
+          createNewTicket={createNewTicket}
           activeTicket={activeTicket}
           onTicketUpdated={onTicketUpdated}
           tickets={sortedDone}

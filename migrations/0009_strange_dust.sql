@@ -1,0 +1,1 @@
+ALTER TABLE `projects` ADD `authorId` integer REFERENCES users(id);

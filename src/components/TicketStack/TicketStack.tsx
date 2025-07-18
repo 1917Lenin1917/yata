@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import type { Ticket } from "@/types/ticket";
 import { useTicketStatus } from "@/hooks/useTicketStatus";
@@ -11,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import TicketCard from "@/components/TicketCard";
-import { createTicket } from "@/services/ticket";
 import { useI18n } from "@/hooks/useI18n";
 
 interface Props {
@@ -19,6 +18,7 @@ interface Props {
   tickets: Ticket[];
   activeTicket: Ticket | undefined;
   onTicketUpdated(): void;
+  createNewTicket(status: Ticket["status"]): void;
 }
 
 export default function TicketStack({
@@ -26,6 +26,7 @@ export default function TicketStack({
   tickets,
   activeTicket,
   onTicketUpdated,
+  createNewTicket,
 }: Props) {
   const params = useTicketStatus(status);
   const { setNodeRef } = useDroppable({
@@ -47,19 +48,6 @@ export default function TicketStack({
         ></TicketCard>
       )),
     [onTicketUpdated, tickets, activeTicket],
-  );
-
-  const createNewTicket = useCallback(
-    (status: Ticket["status"]) => {
-      createTicket({
-        authorId: 1, // TODO: add auth!
-        title: "",
-        date: new Date().toISOString(),
-        desc: "",
-        status,
-      }).then(onTicketUpdated);
-    },
-    [onTicketUpdated],
   );
 
   return (

@@ -1,40 +1,13 @@
 "use server";
 
 import type { Ticket } from "@/types/ticket";
-import {
-  and,
-  gt,
-  gte,
-  type InferSelectModel,
-  lt,
-  lte,
-  ne,
-  sql,
-} from "drizzle-orm";
+import { and, gt, gte, lt, lte, ne, sql } from "drizzle-orm";
 import { tickets, users } from "@/db/schema";
 import { db } from "@/db/drizzle";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
-
-type DtoTicket = InferSelectModel<typeof tickets>;
-type DtoUser = InferSelectModel<typeof users>;
-
-const mapDtoToTicket = (
-  dto: DtoTicket & { author: DtoUser | null },
-): Ticket => ({
-  id: dto.id || -1,
-  description: dto.description || "",
-  author: {
-    id: dto.author?.id || -1,
-    email: dto.author?.email || "",
-    firstName: dto.author?.firstName || "",
-    lastName: dto.author?.lastName || "",
-  },
-  title: dto.title || "",
-  publishedDate: dto.date || "",
-  status: dto.status || "PENDING",
-  priority: dto.priority || 0,
-});
+import { mapDtoToTicket } from "@/services/mappers";
+import { getCurrentUser } from "@/services/user";
 
 export const getCurrentUserTickets = async (): Promise<Ticket[]> => {
   const session = await auth();
@@ -67,22 +40,25 @@ export const deleteTicket = async (ticketId: number) => {
 interface CreateTicket {
   title: string;
   desc: string;
-  authorId: number;
   date: string;
   status: Ticket["status"];
+  projectId: number;
 }
 export const createTicket = async (body: CreateTicket) => {
   const highestPrio = await db.query.tickets.findFirst({
     where: eq(tickets.status, body.status),
     orderBy: (tickets, { desc }) => [desc(tickets.id)],
   });
-  console.log(highestPrio);
+  const author = await getCurrentUser();
+  if (!author) return; // TODO: throw err
+
   await db.insert(tickets).values({
     title: body.title,
     date: body.date,
-    authorId: body.authorId,
+    authorId: author.id,
     description: body.desc,
     status: body.status,
+    projectId: body.projectId,
     priority: (highestPrio?.priority ?? 0) + 1,
   });
 };
@@ -102,7 +78,6 @@ export const changeTicketStatus = async (
   newPriority: number,
 ) =>
   db.transaction(async (tx) => {
-    console.log(ticketId, newStatus, newPriority);
     // 1. Fetch the ticket’s current position
     const [current] = await tx
       .select({ status: tickets.status, priority: tickets.priority })
@@ -174,3 +149,16 @@ export const changeTicketStatus = async (
       .set({ status: newStatus, priority: newPriority })
       .where(eq(tickets.id, ticketId));
   });
+
+export const changeTicketDescription = async (
+  ticketId: number,
+  newDescription: string,
+) => {
+  console.log(newDescription);
+  await db
+    .update(tickets)
+    .set({
+      description: newDescription,
+    })
+    .where(eq(tickets.id, ticketId));
+};

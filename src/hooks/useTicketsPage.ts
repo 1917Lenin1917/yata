@@ -5,9 +5,11 @@ import type {
   DragOverEvent,
   DragStartEvent,
 } from "@dnd-kit/core";
-import { changeTicketStatus, getCurrentUserTickets } from "@/services/ticket";
+import { changeTicketStatus } from "@/services/ticket";
+import { useRouter } from "next/navigation";
 
 export const useTicketsPage = () => {
+  const router = useRouter();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [activeTicket, setActiveTicket] = useState<Ticket>();
 
@@ -83,8 +85,9 @@ export const useTicketsPage = () => {
   );
 
   const onTicketUpdated = useCallback(() => {
-    getCurrentUserTickets().then(setTickets);
-  }, []);
+    router.refresh();
+    // getCurrentUserTickets().then(setTickets);
+  }, [router]);
 
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {

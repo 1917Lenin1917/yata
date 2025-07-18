@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useDebounce } from "@/hooks/useDebounce";
-import { changeTicketTitle } from "@/services/ticket";
+import { changeTicketDescription, changeTicketTitle } from "@/services/ticket";
 import { BadgeAlert } from "lucide-react";
 import {
   Select,
@@ -33,6 +33,13 @@ const onTitleChange = async (ticketId: number, newTitle: string) => {
   await changeTicketTitle(ticketId, newTitle);
 };
 
+const onDescriptionChange = async (
+  ticketId: number,
+  newDescription: string,
+) => {
+  await changeTicketDescription(ticketId, newDescription);
+};
+
 export default function TicketModal({
   ticket,
   isOpen,
@@ -45,10 +52,17 @@ export default function TicketModal({
   );
 
   const debouncedTitle = useDebounce(title, 500);
+  const debouncedDescription = useDebounce(description, 500);
 
   useEffect(() => {
     onTitleChange(ticket.id, debouncedTitle ?? "").then(onTicketUpdated);
-  }, [debouncedTitle, title, onTicketUpdated, ticket.id]);
+  }, [debouncedTitle, onTicketUpdated, ticket.id]);
+
+  useEffect(() => {
+    onDescriptionChange(ticket.id, debouncedDescription ?? "").then(
+      onTicketUpdated,
+    );
+  }, [debouncedDescription, onTicketUpdated, ticket.id]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

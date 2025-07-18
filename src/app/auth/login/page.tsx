@@ -5,10 +5,10 @@ import { signIn } from "next-auth/react";
 export default function LoginPage() {
   const credentialsAction = (formData: FormData) => {
     signIn("credentials", {
-      redirectTo: "/tickets",
+      redirectTo: "/projects",
       email: formData.get("email"),
       password: formData.get("password"),
-    }).then(console.log);
+    });
   };
 
   return (

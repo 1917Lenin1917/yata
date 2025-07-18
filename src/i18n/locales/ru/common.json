@@ -3,6 +3,9 @@
     "ticket": {
       "no_title": "Без названия",
       "create": "Создать"
+    },
+    "sidebar": {
+      "favorites": "Избранные"
     }
   }
 }

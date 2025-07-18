@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Sidebar,
   SidebarContent,
@@ -10,29 +8,27 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
-import { useContext } from "react";
-import { AuthContext } from "@/contexts/AuthContext";
 import { formatUser, getInitials } from "@/utils";
-import { signOut } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import FavoritesNav from "@/components/AppSidebar/FavoritesNav";
+import { getCurrentUser } from "@/services/user";
+import { getCurrentUserProjects } from "@/services/project";
+import LogOutButton from "@/components/AppSidebar/LogOutButton";
 
-const handleLogout = async () => {
-  signOut();
-};
-
-export default function AppSidebar() {
-  const { user } = useContext(AuthContext);
+export default async function AppSidebar() {
+  const user = await getCurrentUser();
+  const projects = await getCurrentUserProjects();
 
   return (
     <Sidebar>
       <SidebarHeader>
         <SidebarMenuButton className="h-fit font-semibold text-sm">
-          <div>My todo app!</div>
+          <div>Placeholder App Name</div>
         </SidebarMenuButton>
       </SidebarHeader>
-      <SidebarContent></SidebarContent>
+      <SidebarContent>
+        <FavoritesNav projects={projects} />
+      </SidebarContent>
       <SidebarFooter>
         <SidebarGroup>
           <SidebarMenu>
@@ -46,9 +42,8 @@ export default function AppSidebar() {
               <div className="text-sm font-semibold text-center h-fit self-center">
                 {user ? formatUser(user) : null}
               </div>
-              <Button onClick={handleLogout} variant="ghost">
-                <LogOut className="ml-auto stroke-destructive w-[16px] h-[16px]" />
-              </Button>
+
+              <LogOutButton />
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>

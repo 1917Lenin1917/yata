@@ -11,5 +11,5 @@ export default withAuth((req) => {
 
 // Only run on private routes
 export const config = {
-  matcher: ["/tickets/:path*"],
+  matcher: ["/projects/:path*"],
 };

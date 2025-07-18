@@ -1,19 +1,10 @@
 "use server";
 
 import { db } from "@/db/drizzle";
-import { and, eq, type InferSelectModel } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { users } from "@/db/schema";
-import type { User } from "@/types/user";
 import { auth } from "@/auth";
-
-type DtoUser = InferSelectModel<typeof users>;
-
-const mapDtoToUser = (dto: DtoUser): User => ({
-  id: dto.id,
-  email: dto.email || "",
-  firstName: dto.firstName || "",
-  lastName: dto.lastName || "",
-});
+import { mapDtoToUser } from "@/services/mappers";
 
 export const getUser = async (email: string, password: string) => {
   const user = await db.query.users.findFirst({

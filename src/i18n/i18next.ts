@@ -6,7 +6,6 @@ import en from "./locales/en/common.json";
 import ru from "./locales/ru/common.json";
 
 if (!i18next.isInitialized) {
-  console.log("init!");
   i18next.use(initReactI18next).init({
     lng: "en",
     fallbackLng: "en",
