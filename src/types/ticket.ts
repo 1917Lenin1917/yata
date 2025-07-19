@@ -5,7 +5,8 @@ export interface Ticket {
   title: string;
   description: string;
   author: User;
-  publishedDate: string;
+  createdAt: string;
+  updatedAt: string;
   status: "PENDING" | "IN_PROGRESS" | "DONE";
   priority: number;
 }

@@ -1,16 +1,25 @@
 "use client";
 
-import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import type { Ticket } from "@/types/ticket";
 import { formatter } from "@/utils";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import TicketModal from "@/components/TicketModal";
 import { useTicketStatus } from "@/hooks/useTicketStatus";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
 import { useI18n } from "@/hooks/useI18n";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
+import { deleteTicket } from "@/services/ticket";
 
 interface Props {
   isActive?: boolean;
@@ -34,8 +43,14 @@ export default function TicketCard({
   const [isOpen, setIsOpen] = useState(false);
   const badgeParams = useTicketStatus(ticket.status);
   const date = useMemo(
-    () => formatter.format(new Date(ticket.publishedDate)),
+    () => formatter.format(new Date(ticket.createdAt)), // todo replace with property deadline
     [ticket],
+  );
+  const handleDeleteTicket = useCallback(
+    (ticketId: number) => {
+      deleteTicket(ticketId).then(onTicketUpdated);
+    },
+    [onTicketUpdated],
   );
 
   const style = {
@@ -67,9 +82,19 @@ export default function TicketCard({
               <Badge className={badgeParams.className}>
                 {badgeParams.icon} {badgeParams.text}
               </Badge>
-              {/*<Badge className={"bg-purple-700 text-primary"}>WORK</Badge>*/}
-              {/*<Badge className={"bg-red-400"}>HIGH</Badge>*/}
             </div>
+            <CardAction>
+              <Button
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleDeleteTicket(ticket.id);
+                }}
+                variant={"ghost"}
+                className={"h-6 w-6"}
+              >
+                <Trash2 className={"h-4 w-4"} />
+              </Button>
+            </CardAction>
           </CardHeader>
           <CardFooter>{date}</CardFooter>
         </Card>

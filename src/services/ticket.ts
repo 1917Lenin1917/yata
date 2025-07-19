@@ -40,7 +40,6 @@ export const deleteTicket = async (ticketId: number) => {
 interface CreateTicket {
   title: string;
   desc: string;
-  date: string;
   status: Ticket["status"];
   projectId: number;
 }
@@ -54,7 +53,8 @@ export const createTicket = async (body: CreateTicket) => {
 
   await db.insert(tickets).values({
     title: body.title,
-    date: body.date,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     authorId: author.id,
     description: body.desc,
     status: body.status,
@@ -68,6 +68,7 @@ export const changeTicketTitle = async (ticketId: number, newTitle: string) => {
     .update(tickets)
     .set({
       title: newTitle,
+      updatedAt: new Date().toISOString(),
     })
     .where(eq(tickets.id, ticketId));
 };
@@ -91,7 +92,10 @@ export const changeTicketStatus = async (
     if (oldStatus !== newStatus) {
       await tx
         .update(tickets)
-        .set({ priority: sql`${tickets.priority} - 1` })
+        .set({
+          priority: sql`${tickets.priority} - 1`,
+          updatedAt: new Date().toISOString(),
+        })
         .where(
           and(
             eq(tickets.status, oldStatus!),
@@ -107,7 +111,10 @@ export const changeTicketStatus = async (
         // Moving up: bump everything in [new, old‑1] down by 1
         await tx
           .update(tickets)
-          .set({ priority: sql`${tickets.priority} + 1` })
+          .set({
+            priority: sql`${tickets.priority} + 1`,
+            updatedAt: new Date().toISOString(),
+          })
           .where(
             and(
               eq(tickets.status, newStatus),
@@ -120,7 +127,10 @@ export const changeTicketStatus = async (
         // Moving down: pull everything in (old, new] up by 1
         await tx
           .update(tickets)
-          .set({ priority: sql`${tickets.priority} - 1` })
+          .set({
+            priority: sql`${tickets.priority} - 1`,
+            updatedAt: new Date().toISOString(),
+          })
           .where(
             and(
               eq(tickets.status, newStatus),
@@ -134,7 +144,10 @@ export const changeTicketStatus = async (
       // Entering a different column: bump everything ≥ newPriority
       await tx
         .update(tickets)
-        .set({ priority: sql`${tickets.priority} + 1` })
+        .set({
+          priority: sql`${tickets.priority} + 1`,
+          updatedAt: new Date().toISOString(),
+        })
         .where(
           and(
             eq(tickets.status, newStatus),
@@ -146,7 +159,11 @@ export const changeTicketStatus = async (
     // 4. Finally park the ticket in its new spot
     await tx
       .update(tickets)
-      .set({ status: newStatus, priority: newPriority })
+      .set({
+        status: newStatus,
+        priority: newPriority,
+        updatedAt: new Date().toISOString(),
+      })
       .where(eq(tickets.id, ticketId));
   });
 
@@ -159,6 +176,7 @@ export const changeTicketDescription = async (
     .update(tickets)
     .set({
       description: newDescription,
+      updatedAt: new Date().toISOString(),
     })
     .where(eq(tickets.id, ticketId));
 };

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import TicketCard from "@/components/TicketCard";
 import { useI18n } from "@/hooks/useI18n";
+import { Badge } from "@/components/ui/badge";
 
 interface Props {
   status: Ticket["status"];
@@ -51,25 +52,25 @@ export default function TicketStack({
   );
 
   return (
-    <div
-      className={
-        "grow basis-0 shrink-0 min-w-[332px] max-w-[calc(300px+16px*2)]"
-      }
-    >
-      <h1 className={"mb-4 text-center text-4xl font-semibold"}>
-        {params.text}
-      </h1>
+    <div className={"grow basis-0 shrink-0 min-w-[316px]"}>
       <SortableContext
         id={`stack-${status}`}
         items={tickets}
         strategy={verticalListSortingStrategy}
       >
         <div
-          className={"flex flex-col p-4 gap-2 rounded-2xl bg-zinc-800"}
+          className={"flex flex-col p-2 gap-2 rounded-2xl bg-zinc-800"}
           ref={setNodeRef}
         >
+          <div className={"flex gap-2"}>
+            <Badge variant={"outline"}>{params.text}</Badge> {tickets.length}
+          </div>
           {mappedTickets}
-          <Button onClick={() => createNewTicket(status)} className={"mt-4"}>
+          <Button
+            variant={"outline"}
+            onClick={() => createNewTicket(status)}
+            className={"mt-4 cursor-pointer"}
+          >
             <Plus /> {t("ticket.create")}
           </Button>
         </div>

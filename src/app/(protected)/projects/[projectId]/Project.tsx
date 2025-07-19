@@ -56,7 +56,6 @@ export default function ProjectPage({ project }: Props) {
     (status: Ticket["status"]) => {
       createTicket({
         title: "",
-        date: new Date().toISOString(),
         desc: "",
         projectId: project.id,
         status,

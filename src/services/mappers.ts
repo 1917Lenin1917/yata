@@ -15,7 +15,8 @@ export const mapDtoToTicket = (
   description: dto.description || "",
   author: dto.author ? mapDtoToUser(dto.author) : null,
   title: dto.title || "",
-  publishedDate: dto.date || "",
+  createdAt: dto.createdAt || "",
+  updatedAt: dto.updatedAt || "",
   status: dto.status || "PENDING",
   priority: dto.priority || 0,
 });

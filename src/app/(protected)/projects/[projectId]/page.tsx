@@ -13,7 +13,15 @@ export default async function ProjectPage(props: Props) {
 
   if (!project) notFound();
 
-  return <ProjectComponent project={project}></ProjectComponent>;
+  return (
+    <div className={"my-8"}>
+      <div className={"px-8 text-4xl"}>
+        {project.emoji} {project.name}
+      </div>
+      <div className={"px-8 py-2 text-xl"}>{project.description}</div>
+      <ProjectComponent project={project}></ProjectComponent>
+    </div>
+  );
 }
 
 type MetaProps = {
