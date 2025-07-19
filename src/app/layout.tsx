@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { ThemeProvider } from "@/components/theme-provider";
+import { LocaleProvider, ThemeProvider } from "@/components/Providers";
 import type { ReactNode } from "react";
 import { SessionProvider } from "next-auth/react";
-import AuthProvider from "@/components/AuthProvider";
+import { AuthProvider } from "../components/Providers";
 import { getCurrentUser } from "@/services/user";
 
 import "./globals.css";
@@ -30,7 +30,7 @@ export default async function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              {children}
+              <LocaleProvider>{children}</LocaleProvider>
             </ThemeProvider>
           </AuthProvider>
         </SessionProvider>

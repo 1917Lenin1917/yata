@@ -11,8 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import TicketCard from "@/components/TicketCard";
-import { useI18n } from "@/hooks/useI18n";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   status: Ticket["status"];
@@ -35,7 +35,7 @@ export default function TicketStack({
     data: { status },
   });
 
-  const { t } = useI18n();
+  const { t } = useTranslation();
 
   const mappedTickets = useMemo(
     () =>
@@ -59,7 +59,7 @@ export default function TicketStack({
         strategy={verticalListSortingStrategy}
       >
         <div
-          className={"flex flex-col p-2 gap-2 rounded-2xl bg-zinc-800"}
+          className={"flex flex-col p-2 gap-2 rounded-2xl bg-accent"}
           ref={setNodeRef}
         >
           <div className={"flex gap-2"}>

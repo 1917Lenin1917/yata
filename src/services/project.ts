@@ -37,3 +37,22 @@ export const getProjectWithTickets = async (projectId: number) => {
     return null;
   }
 };
+
+interface CreateNewProjectPayload {
+  name: string;
+  description: string;
+  emoji: string;
+}
+
+export const createNewProject = async (payload: CreateNewProjectPayload) => {
+  const author = await getCurrentUser();
+
+  if (!author) return;
+
+  await db.insert(projects).values({
+    name: payload.name,
+    description: payload.description,
+    emoji: payload.description,
+    authorId: author.id,
+  });
+};

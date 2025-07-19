@@ -16,10 +16,10 @@ import TicketModal from "@/components/TicketModal";
 import { useTicketStatus } from "@/hooks/useTicketStatus";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
-import { useI18n } from "@/hooks/useI18n";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { deleteTicket } from "@/services/ticket";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   isActive?: boolean;
@@ -38,7 +38,7 @@ export default function TicketCard({
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: ticket.id, data: { id: ticket.id } });
 
-  const { t } = useI18n();
+  const { t } = useTranslation();
 
   const [isOpen, setIsOpen] = useState(false);
   const badgeParams = useTicketStatus(ticket.status);

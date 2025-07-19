@@ -5,7 +5,8 @@
       "create": "Create a new ticket"
     },
     "sidebar": {
-      "favorites": "Favorites"
+      "projects": "Projects",
+      "create_project": "Create a new project"
     }
   }
 

@@ -10,10 +10,12 @@ import {
 } from "@/components/ui/sidebar";
 import { formatUser, getInitials } from "@/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import FavoritesNav from "@/components/AppSidebar/FavoritesNav";
+import ProjectsNav from "@/components/AppSidebar/ProjectsNav";
 import { getCurrentUser } from "@/services/user";
 import { getCurrentUserProjects } from "@/services/project";
 import LogOutButton from "@/components/AppSidebar/LogOutButton";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
+import LangSwitcher from "@/components/LangSwitcher";
 
 export default async function AppSidebar() {
   const user = await getCurrentUser();
@@ -27,11 +29,15 @@ export default async function AppSidebar() {
         </SidebarMenuButton>
       </SidebarHeader>
       <SidebarContent>
-        <FavoritesNav projects={projects} />
+        <ProjectsNav projects={projects} />
       </SidebarContent>
       <SidebarFooter>
         <SidebarGroup>
-          <SidebarMenu>
+          <SidebarMenu className={"gap-4"}>
+            <SidebarMenuItem className={"flex justify-between"}>
+              <LangSwitcher />
+              <ThemeSwitcher />
+            </SidebarMenuItem>
             <SidebarMenuItem className="flex justify-between">
               <Avatar>
                 <AvatarImage src={"https://cataas.com/cat"} />
