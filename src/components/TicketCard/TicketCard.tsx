@@ -1,25 +1,17 @@
 "use client";
 
-import {
-  Card,
-  CardAction,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardAction, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Ticket } from "@/types/ticket";
-import { formatter } from "@/utils";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import TicketModal from "@/components/TicketModal";
-import { useTicketStatus } from "@/hooks/useTicketStatus";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { deleteTicket } from "@/services/ticket";
 import { useTranslation } from "react-i18next";
+import { DisplayProperty } from "@/components/Property";
 
 interface Props {
   isActive?: boolean;
@@ -38,11 +30,7 @@ export default function TicketCard({
   const { t } = useTranslation();
 
   const [isOpen, setIsOpen] = useState(false);
-  const badgeParams = useTicketStatus(ticket.status);
-  const date = useMemo(
-    () => formatter.format(new Date(ticket.createdAt)), // todo replace with property deadline
-    [ticket],
-  );
+
   const handleDeleteTicket = useCallback(
     (ticketId: number) => {
       deleteTicket(ticketId).then(onTicketUpdated);
@@ -79,9 +67,11 @@ export default function TicketCard({
               {ticket.title || t("ticket.no_title")}
             </CardTitle>
             <div className={"flex gap-1 flex-wrap"}>
-              <Badge className={badgeParams.className}>
-                {badgeParams.icon} {badgeParams.text}
-              </Badge>
+              {ticket.properties
+                .filter((p) => p.showOnCard)
+                .map((p) => (
+                  <DisplayProperty property={p} key={p.id} />
+                ))}
             </div>
             <CardAction>
               <Button
@@ -96,7 +86,7 @@ export default function TicketCard({
               </Button>
             </CardAction>
           </CardHeader>
-          <CardFooter>{date}</CardFooter>
+          {/*<CardFooter>{date}</CardFooter>*/}
         </Card>
       )}
 

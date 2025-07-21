@@ -6,6 +6,7 @@ export type Property = {
   icon: IconName;
   name: string;
   value: string;
+  showOnCard: boolean;
 } & (
   | {
       type: "text";

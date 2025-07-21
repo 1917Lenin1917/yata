@@ -5,83 +5,136 @@ import type {
   DragOverEvent,
   DragStartEvent,
 } from "@dnd-kit/core";
-import { changeTicketStatus } from "@/services/ticket";
+import { changeTicketPropertyValue } from "@/services/ticket";
 import { useRouter } from "next/navigation";
+import type { GroupByProperty } from "@/types/project";
+import type { Property } from "@/types/property";
 
 export const useTicketsPage = () => {
   const router = useRouter();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [activeTicket, setActiveTicket] = useState<Ticket>();
+  const [groupBy, setGroupBy] = useState<GroupByProperty>();
 
-  const reorderTickets = (
-    list: Ticket[],
-    ticketId: number,
-    targetStatus: Ticket["status"],
-    targetPriority: number,
-  ): Ticket[] => {
-    const out = list.map((t) => ({ ...t }));
+  const getPropValue = (ticket: Ticket, propId: Property["id"] | undefined) =>
+    ticket.properties.find((p) => p.id === propId)?.value ?? "";
 
-    const moved = out.find((t) => t.id === ticketId);
-    if (!moved) return list;
+  const setPropValue = (
+    ticket: Ticket,
+    propId: Property["id"] | undefined,
+    value: string,
+  ) => {
+    if (!propId) return;
 
-    const { status: srcStatus, priority: srcPriority } = moved;
-
-    if (srcStatus !== targetStatus) {
-      out.forEach((t) => {
-        if (t.status === srcStatus && t.priority > srcPriority) t.priority -= 1;
-      });
+    const idx = ticket.properties.findIndex((p) => p.id === propId);
+    if (idx === -1) {
+      return;
     }
+    ticket.properties[idx] = { ...ticket.properties[idx], value };
+  };
 
-    if (srcStatus === targetStatus) {
-      if (targetPriority < srcPriority) {
+  const reorderTickets = useCallback(
+    (
+      list: Ticket[],
+      ticketId: number,
+      targetValue: string,
+      targetPriority: number,
+    ): Ticket[] => {
+      if (!groupBy) return list; // nothing to do if we are not grouping
+      const propId = groupBy.id;
+
+      // shallow‑copy tickets + properties to keep things immutable
+      const out = list.map((t) => ({ ...t, properties: [...t.properties] }));
+
+      const moved = out.find((t) => t.id === ticketId);
+      if (!moved) return list;
+
+      const srcValue = getPropValue(moved, propId);
+      const srcPriority = moved.priority;
+
+      // ─── priority bookkeeping ─────────────────────────────────────────────
+      if (srcValue !== targetValue) {
+        // leaving its old column ➜ close gap there
         out.forEach((t) => {
-          if (
-            t.status === srcStatus &&
-            t.priority >= targetPriority &&
-            t.priority < srcPriority &&
-            t.id !== ticketId
-          )
-            t.priority += 1;
-        });
-      } else if (targetPriority > srcPriority) {
-        out.forEach((t) => {
-          if (
-            t.status === srcStatus &&
-            t.priority <= targetPriority &&
-            t.priority > srcPriority &&
-            t.id !== ticketId
-          )
+          if (getPropValue(t, propId) === srcValue && t.priority > srcPriority)
             t.priority -= 1;
         });
       }
-    } else {
-      out.forEach((t) => {
-        if (t.status === targetStatus && t.priority >= targetPriority) {
-          t.priority += 1;
+
+      if (srcValue === targetValue) {
+        // re‑ordering inside same column
+        if (targetPriority < srcPriority) {
+          out.forEach((t) => {
+            const pv = getPropValue(t, propId);
+            if (
+              pv === srcValue &&
+              t.priority >= targetPriority &&
+              t.priority < srcPriority &&
+              t.id !== ticketId
+            )
+              t.priority += 1;
+          });
+        } else if (targetPriority > srcPriority) {
+          out.forEach((t) => {
+            const pv = getPropValue(t, propId);
+            if (
+              pv === srcValue &&
+              t.priority <= targetPriority &&
+              t.priority > srcPriority &&
+              t.id !== ticketId
+            )
+              t.priority -= 1;
+          });
         }
+      } else {
+        // dropping into a different column ➜ make room there
+        out.forEach((t) => {
+          if (
+            getPropValue(t, propId) === targetValue &&
+            t.priority >= targetPriority
+          )
+            t.priority += 1;
+        });
+      }
+
+      // update moved ticket
+      setPropValue(moved, propId, targetValue);
+      moved.priority = targetPriority;
+
+      // stable sort: first by column value, then by priority
+      return out.sort((a, b) => {
+        const av = getPropValue(a, propId);
+        const bv = getPropValue(b, propId);
+        return av === bv ? a.priority - b.priority : av.localeCompare(bv);
       });
-    }
+    },
+    [groupBy],
+  );
 
-    moved.status = targetStatus;
-    moved.priority = targetPriority;
-
-    return out.sort((a, b) =>
-      a.status === b.status
-        ? a.priority - b.priority
-        : a.status.localeCompare(b.status),
-    );
-  };
+  const options = useMemo(
+    () => [
+      { value: "" },
+      ...((groupBy as Property & { type: "status" })?.settings?.options || []),
+    ],
+    [groupBy],
+  );
 
   const groupedTickets = useMemo(
     () =>
-      tickets.reduce<Record<Ticket["status"], Ticket[]>>(
+      tickets.reduce<Record<string, Ticket[]>>(
         (accumulator, ticket) => {
-          accumulator[ticket.status].push(ticket);
+          const property = ticket.properties.find(
+            (pr) => pr.id === groupBy?.id,
+          );
+
+          (accumulator[property?.value ?? ""] =
+            accumulator[property?.value ?? ""] || []).push(ticket);
+
           return accumulator;
         },
-        { DONE: [], IN_PROGRESS: [], PENDING: [] },
+        Object.fromEntries(options.map((option) => [option.value, []])),
       ),
-    [tickets],
+    [tickets, options, groupBy?.id],
   );
 
   const onTicketUpdated = useCallback(() => {
@@ -102,65 +155,84 @@ export const useTicketsPage = () => {
       setActiveTicket(undefined);
 
       const ticketId = event.active.data?.current?.id as number | undefined;
+      if (!ticketId) return;
+
       const overTicketId = event.over?.data?.current?.id as number | undefined;
-      const overStatus = event.over?.data?.current?.status as
-        | Ticket["status"]
-        | undefined;
+      const overValue = event.over?.data?.current?.status as string | undefined; // column’s property value
 
-      if (!ticketId || (!overTicketId && !overStatus)) return;
+      // ---------------- figure out drop target ----------------
+      let targetValue: string | undefined;
+      let targetPriority: number | undefined;
 
-      // Where are we dropping?
       const overTicket = tickets.find((t) => t.id === overTicketId);
-      const targetStatus = overTicket?.status ?? overStatus!;
-      const targetPriority = overTicket
-        ? overTicket.priority // before the hovered card
-        : Math.max(
+      if (overTicket) {
+        targetValue = getPropValue(overTicket, groupBy?.id);
+        targetPriority = overTicket.priority; // insert just above hovered card
+      } else if (overValue !== undefined) {
+        targetValue = overValue;
+        // bottom of the column
+        targetPriority =
+          Math.max(
             0,
             ...tickets
-              .filter((t) => t.status === targetStatus)
+              .filter((t) => getPropValue(t, groupBy?.id) === targetValue)
               .map((t) => t.priority),
-          ) + 1; // bottom of the column
+          ) + 1;
+      }
 
-      // ---- optimistic state update ----
+      if (targetValue === undefined || targetPriority === undefined) return;
+
+      // ---------------- optimistic UI ----------------
       const optimistic = reorderTickets(
         tickets,
         ticketId,
-        targetStatus,
+        targetValue,
         targetPriority,
       );
       setTickets(optimistic);
 
-      // ---- server sync ----
-      changeTicketStatus(ticketId, targetStatus, targetPriority)
+      // ---------------- server sync ------------------
+      if (!groupBy) return;
+      changeTicketPropertyValue(ticketId, groupBy?.id, targetValue)
         .then(onTicketUpdated) // refresh from back‑end
         .catch(() => setTickets(tickets)); // revert on error
     },
-    [tickets, onTicketUpdated],
+    [tickets, reorderTickets, groupBy, onTicketUpdated],
   );
 
   const handleDragOver = useCallback(
     (event: DragOverEvent) => {
-      const ticketId = event.active.data.current?.id;
-      const overId = event.over?.data.current?.id;
-      const overStatus =
-        event.over?.data.current?.status ??
-        tickets.find((t) => t.id === overId)?.status;
+      const ticketId = event.active.data?.current?.id as number | undefined;
+      if (!ticketId) return; // nothing to move
 
-      if (!ticketId || !overStatus) return;
+      const overId = event.over?.data?.current?.id as number | undefined;
+      const columnValue =
+        (event.over?.data?.current?.status as string | undefined) ?? // column registered its value on `data`
+        (() => {
+          const overTicket = tickets.find((t) => t.id === overId);
+          return overTicket ? getPropValue(overTicket, groupBy?.id) : undefined;
+        })();
 
-      setTimeout(
-        () =>
-          setTickets((prev) => {
-            const i = prev.findIndex((t) => t.id === ticketId);
-            if (i === -1 || prev[i].status === overStatus) return prev; // nothing changed ➜ no update
-            const next = [...prev];
-            next[i] = { ...next[i], status: overStatus };
-            return next;
-          }),
-        0,
-      );
+      if (columnValue === undefined) return; // we’re over something that isn’t a column we care about
+
+      /* ── optimistic column swap so the card “snaps” while hovering ───────── */
+      setTimeout(() => {
+        setTickets((prev) => {
+          const idx = prev.findIndex((t) => t.id === ticketId);
+          if (idx === -1) return prev; // ticket disappeared?
+
+          const currentValue = getPropValue(prev[idx], groupBy?.id);
+          if (currentValue === columnValue) return prev; // already in that column
+
+          const next = [...prev];
+          next[idx] = { ...next[idx], properties: [...next[idx].properties] };
+          setPropValue(next[idx], groupBy?.id, columnValue);
+
+          return next;
+        });
+      }, 0);
     },
-    [tickets],
+    [tickets, groupBy?.id],
   );
 
   return {
@@ -169,6 +241,9 @@ export const useTicketsPage = () => {
 
     activeTicket,
     setActiveTicket,
+
+    groupBy,
+    setGroupBy,
 
     groupedTickets,
 

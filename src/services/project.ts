@@ -3,7 +3,13 @@
 import { db } from "@/db/drizzle";
 import { getCurrentUser } from "@/services/user";
 import { eq } from "drizzle-orm";
-import { projects, users } from "@/db/schema";
+import {
+  projects,
+  properties,
+  propertyInstances,
+  tickets,
+  users,
+} from "@/db/schema";
 import {
   mapDtoToProject,
   mapDtoToProjectWithTickets,
@@ -27,6 +33,7 @@ export const getProjectWithTickets = async (projectId: number) => {
   try {
     const data = await db.query.projects.findFirst({
       with: {
+        properties: true,
         tickets: {
           with: {
             author: true,
@@ -42,7 +49,8 @@ export const getProjectWithTickets = async (projectId: number) => {
     });
 
     return data ? mapDtoToProjectWithTickets(data) : null;
-  } catch {
+  } catch (e) {
+    console.error(e);
     return null;
   }
 };
@@ -64,4 +72,49 @@ export const createNewProject = async (payload: CreateNewProjectPayload) => {
     emoji: payload.description,
     authorId: author.id,
   });
+};
+
+export const createProjectProperty = async (
+  iconName: string,
+  propertyType: string,
+  projectId: number,
+  settings: string,
+) => {
+  const property = (
+    await db
+      .insert(properties)
+      .values({
+        icon: iconName,
+        type: propertyType,
+        projectId: projectId,
+        name: "",
+        showOnTicketCard: false,
+        settings: settings,
+      })
+      .returning()
+  )[0];
+
+  const projectTickets = await db.query.tickets.findMany({
+    where: eq(tickets.projectId, projectId),
+  });
+
+  await db.insert(propertyInstances).values(
+    projectTickets.map((ticket) => ({
+      ticketId: ticket.id,
+      propertyId: property.id,
+      value: "",
+    })),
+  );
+};
+
+export const changePropertySettings = async (
+  propertyId: number,
+  newSettings: object,
+) => {
+  await db
+    .update(properties)
+    .set({
+      settings: newSettings,
+    })
+    .where(eq(properties.id, propertyId));
 };

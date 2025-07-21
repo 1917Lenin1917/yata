@@ -1,7 +1,6 @@
 "use server";
 
-import type { Ticket } from "@/types/ticket";
-import { and, gt, gte, lt, lte, ne, sql } from "drizzle-orm";
+import { and } from "drizzle-orm";
 import {
   properties,
   propertyInstances,
@@ -47,17 +46,21 @@ export const deleteTicket = async (ticketId: number) => {
 interface CreateTicket {
   title: string;
   desc: string;
-  status: Ticket["status"];
   projectId: number;
+  property?: {
+    id: number;
+    value: string;
+  };
 }
 export const createTicket = async (body: CreateTicket) => {
   const author = await getCurrentUser();
   if (!author) return; // TODO: throw err
 
-  const highestPrio = await db.query.tickets.findFirst({
-    where: eq(tickets.status, body.status),
-    orderBy: (tickets, { desc }) => [desc(tickets.id)],
-  });
+  // TODO: rewrite with property priority
+  // const highestPrio = await db.query.tickets.findFirst({
+  //   where: eq(tickets.status, body.status),
+  //   orderBy: (tickets, { desc }) => [desc(tickets.id)],
+  // });
 
   const ticket = (
     await db
@@ -68,9 +71,9 @@ export const createTicket = async (body: CreateTicket) => {
         updatedAt: new Date().toISOString(),
         authorId: author.id,
         description: body.desc,
-        status: body.status,
         projectId: body.projectId,
-        priority: (highestPrio?.priority ?? 0) + 1,
+        // priority: (highestPrio?.priority ?? 0) + 1,
+        priority: 0,
       })
       .returning()
   )[0];
@@ -86,6 +89,20 @@ export const createTicket = async (body: CreateTicket) => {
       value: "",
     })),
   );
+
+  if (!body.property) return;
+
+  await db
+    .update(propertyInstances)
+    .set({
+      value: body.property.value,
+    })
+    .where(
+      and(
+        eq(propertyInstances.ticketId, ticket.id),
+        eq(propertyInstances.propertyId, body.property.id),
+      ),
+    );
 };
 
 export const changeTicketTitle = async (ticketId: number, newTitle: string) => {
@@ -98,105 +115,10 @@ export const changeTicketTitle = async (ticketId: number, newTitle: string) => {
     .where(eq(tickets.id, ticketId));
 };
 
-export const changeTicketStatus = async (
-  ticketId: number,
-  newStatus: Ticket["status"],
-  newPriority: number,
-) =>
-  db.transaction(async (tx) => {
-    // 1. Fetch the ticket’s current position
-    const [current] = await tx
-      .select({ status: tickets.status, priority: tickets.priority })
-      .from(tickets)
-      .where(eq(tickets.id, ticketId));
-
-    if (!current) throw new Error("Ticket not found");
-    const { status: oldStatus, priority: oldPriority } = current;
-
-    // 2. Close the gap we’ll leave *if* we’re exiting the old column
-    if (oldStatus !== newStatus) {
-      await tx
-        .update(tickets)
-        .set({
-          priority: sql`${tickets.priority} - 1`,
-          updatedAt: new Date().toISOString(),
-        })
-        .where(
-          and(
-            eq(tickets.status, oldStatus!),
-            gt(tickets.priority, oldPriority!),
-          ),
-        );
-    }
-
-    // 3. Make room in the target column
-    if (oldStatus === newStatus) {
-      // Re‑ordering inside the same column
-      if (newPriority < oldPriority!) {
-        // Moving up: bump everything in [new, old‑1] down by 1
-        await tx
-          .update(tickets)
-          .set({
-            priority: sql`${tickets.priority} + 1`,
-            updatedAt: new Date().toISOString(),
-          })
-          .where(
-            and(
-              eq(tickets.status, newStatus),
-              gte(tickets.priority, newPriority),
-              lt(tickets.priority, oldPriority!),
-              ne(tickets.id, ticketId),
-            ),
-          );
-      } else if (newPriority > oldPriority!) {
-        // Moving down: pull everything in (old, new] up by 1
-        await tx
-          .update(tickets)
-          .set({
-            priority: sql`${tickets.priority} - 1`,
-            updatedAt: new Date().toISOString(),
-          })
-          .where(
-            and(
-              eq(tickets.status, newStatus),
-              lte(tickets.priority, newPriority),
-              gt(tickets.priority, oldPriority!),
-              ne(tickets.id, ticketId),
-            ),
-          );
-      }
-    } else {
-      // Entering a different column: bump everything ≥ newPriority
-      await tx
-        .update(tickets)
-        .set({
-          priority: sql`${tickets.priority} + 1`,
-          updatedAt: new Date().toISOString(),
-        })
-        .where(
-          and(
-            eq(tickets.status, newStatus),
-            gte(tickets.priority, newPriority),
-          ),
-        );
-    }
-
-    // 4. Finally park the ticket in its new spot
-    await tx
-      .update(tickets)
-      .set({
-        status: newStatus,
-        priority: newPriority,
-        updatedAt: new Date().toISOString(),
-      })
-      .where(eq(tickets.id, ticketId));
-  });
-
 export const changeTicketDescription = async (
   ticketId: number,
   newDescription: string,
 ) => {
-  console.log(newDescription);
   await db
     .update(tickets)
     .set({

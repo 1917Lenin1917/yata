@@ -9,19 +9,33 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect } from "react";
 import TicketStack from "@/components/TicketStack";
 import { useTicketsPage } from "@/hooks/useTicketsPage";
 import type { ProjectWithTickets } from "@/types/project";
-import type { Ticket } from "@/types/ticket";
+import { Separator } from "@/components/ui/separator";
+import { Check, Funnel } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
+import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 import { createTicket } from "@/services/ticket";
+import { ProjectContext } from "@/contexts/ProjectContext";
 
 interface Props {
   project: ProjectWithTickets;
 }
 
 export default function ProjectPage({ project }: Props) {
+  const { t } = useTranslation();
   const {
+    groupBy,
+    setGroupBy,
     setTickets,
     activeTicket,
     groupedTickets,
@@ -39,66 +53,103 @@ export default function ProjectPage({ project }: Props) {
     setTickets(project.tickets);
   }, [project, setTickets]);
 
-  const sortedPending = useMemo(
-    () => groupedTickets["PENDING"].sort((a, b) => a.priority - b.priority),
-    [groupedTickets],
-  );
-  const sortedActive = useMemo(
-    () => groupedTickets["IN_PROGRESS"].sort((a, b) => a.priority - b.priority),
-    [groupedTickets],
-  );
-  const sortedDone = useMemo(
-    () => groupedTickets["DONE"].sort((a, b) => a.priority - b.priority),
-    [groupedTickets],
-  );
+  useEffect(() => {
+    if (!groupBy) {
+      const localId = Number(localStorage.getItem("groupBy")) || undefined;
+      setGroupBy(project.properties.find((pr) => pr.id === localId));
+      return;
+    }
+    localStorage.setItem("groupBy", `${groupBy.id}`);
+  }, [groupBy, project.properties, setGroupBy]);
 
   const createNewTicket = useCallback(
-    (status: Ticket["status"]) => {
+    (status: string) => {
       createTicket({
         title: "",
         desc: "",
         projectId: project.id,
-        status,
+        property: groupBy
+          ? {
+              id: groupBy.id,
+              value: status,
+            }
+          : undefined,
       }).then(onTicketUpdated);
     },
-    [onTicketUpdated, project],
+    [groupBy, onTicketUpdated, project.id],
   );
 
-  return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCorners}
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDragEnd={handleDragEnd}
-    >
-      <div className={"p-8 flex flex-row gap-4 h-full"}>
-        <TicketStack
-          createNewTicket={createNewTicket}
-          activeTicket={activeTicket}
-          onTicketUpdated={onTicketUpdated}
-          tickets={sortedPending}
-          status={"PENDING"}
-        ></TicketStack>
-        <TicketStack
-          createNewTicket={createNewTicket}
-          activeTicket={activeTicket}
-          onTicketUpdated={onTicketUpdated}
-          tickets={sortedActive}
-          status={"IN_PROGRESS"}
-        ></TicketStack>
-        <TicketStack
-          createNewTicket={createNewTicket}
-          activeTicket={activeTicket}
-          onTicketUpdated={onTicketUpdated}
-          tickets={sortedDone}
-          status={"DONE"}
-        ></TicketStack>
-      </div>
+  const stacks = Object.entries(groupedTickets).map(([value, arr]) => (
+    <TicketStack
+      key={value}
+      createNewTicket={createNewTicket}
+      activeTicket={activeTicket}
+      onTicketUpdated={onTicketUpdated}
+      tickets={arr}
+      status={value}
+    />
+  ));
 
-      <DragOverlay dropAnimation={null}>
-        {activeTicket ? <TicketCard ticket={activeTicket}></TicketCard> : null}
-      </DragOverlay>
-    </DndContext>
+  return (
+    <ProjectContext.Provider value={project}>
+      <div className={"w-full  flex justify-between"}>
+        <div></div>
+        <div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant={"ghost"} className={"cursor-pointer"}>
+                <Funnel />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className={"p-0"}>
+              <Command>
+                <CommandGroup heading={t("project.group_by")}>
+                  {project.properties
+                    .filter((pr) => pr.type === "status")
+                    .map((property, key) => (
+                      <CommandItem
+                        key={key}
+                        onSelect={() => {
+                          setGroupBy(
+                            groupBy?.id === property.id ? undefined : property,
+                          );
+                          if (groupBy?.id === property.id)
+                            localStorage.removeItem("groupBy");
+                        }}
+                      >
+                        <span>{property.name}</span>
+                        <Check
+                          className={cn(
+                            "ml-auto",
+                            groupBy?.id === property.id
+                              ? "opacity-100"
+                              : "opacity-0",
+                          )}
+                        />
+                      </CommandItem>
+                    ))}
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+      <Separator />
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+      >
+        <div className={"p-8 flex flex-row gap-4 h-full"}>{stacks}</div>
+
+        <DragOverlay dropAnimation={null}>
+          {activeTicket ? (
+            <TicketCard ticket={activeTicket}></TicketCard>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+    </ProjectContext.Provider>
   );
 }

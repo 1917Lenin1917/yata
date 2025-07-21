@@ -8,7 +8,6 @@ export interface Ticket {
   author: User;
   createdAt: string;
   updatedAt: string;
-  status: "PENDING" | "IN_PROGRESS" | "DONE";
   priority: number;
   properties: Property[];
 }

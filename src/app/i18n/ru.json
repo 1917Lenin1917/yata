@@ -1,8 +1,12 @@
 {
   "common": {
+    "project": {
+      "group_by": "Группировать"
+    },
     "ticket": {
       "no_title": "Без названия",
-      "create": "Создать"
+      "create": "Создать",
+      "no_status": "Нет статуса"
     },
     "sidebar": {
       "projects": "Проекты",

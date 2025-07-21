@@ -29,15 +29,15 @@ export const mapDtoToTicket = (
   title: dto.title || "",
   createdAt: dto.createdAt || "",
   updatedAt: dto.updatedAt || "",
-  status: dto.status || "PENDING",
   priority: dto.priority || 0,
   properties: dto.properties.map((property) => ({
     id: property.propertyId,
     icon: property.property.icon as IconName,
     value: property.value ?? "",
-    name: property.property.name || "No name",
+    name: property.property.name || "",
     type: property.property.type ?? "text",
     settings: property.property.settings as never,
+    showOnCard: property.property.showOnTicketCard ?? false,
   })),
 });
 
@@ -61,6 +61,7 @@ export const mapDtoToProjectWithTickets = (
       author: DtoUser;
       properties: (DtoPropertyInstance & { property: DtoProperty })[];
     })[];
+    properties: DtoProperty[];
   },
 ): ProjectWithTickets => ({
   id: dto.id,
@@ -68,4 +69,11 @@ export const mapDtoToProjectWithTickets = (
   description: dto.description,
   emoji: dto.emoji,
   tickets: dto.tickets.map(mapDtoToTicket),
+  properties: dto.properties.map((property) => ({
+    id: property.id,
+    icon: property.icon as IconName,
+    name: property.name || "",
+    type: property.type ?? "text",
+    settings: property.settings as never,
+  })),
 });

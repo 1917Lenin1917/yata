@@ -67,6 +67,7 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
     fields: [projects.authorId],
     references: [users.id],
   }),
+  properties: many(properties),
 }));
 
 export const ticketsRelations = relations(tickets, ({ one, many }) => ({
@@ -95,6 +96,10 @@ export const propertyInstancesRelations = relations(
   }),
 );
 
-export const propertiesRelations = relations(properties, ({ many }) => ({
+export const propertiesRelations = relations(properties, ({ one, many }) => ({
   instance: many(propertyInstances),
+  project: one(projects, {
+    fields: [properties.projectId],
+    references: [projects.id],
+  }),
 }));

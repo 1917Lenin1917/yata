@@ -24,7 +24,7 @@ export function TextProperty({ property, onNameChange, onValueChange }: Props) {
 
   return (
     <>
-      <div className={"flex gap-1 "}>
+      <div className={"flex gap-1 pl-3"}>
         <DynamicIcon className={"h-4 w-4 self-center"} name={property.icon} />
         {/*<span>{property.name}</span>*/}
         <Input

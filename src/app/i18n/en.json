@@ -1,12 +1,22 @@
 {
   "common": {
+    "project": {
+      "group_by": "Group by"
+    },
     "ticket": {
       "no_title": "No title",
-      "create": "Create a new ticket"
+      "create": "Create a new ticket",
+      "no_status": "None"
     },
     "sidebar": {
       "projects": "Projects",
       "create_project": "Create a new project"
+    },
+    "property": {
+      "text": "Text",
+      "number": "Number",
+      "date": "Date",
+      "status": "Status"
     }
   }
 

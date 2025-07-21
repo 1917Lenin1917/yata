@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { Ticket } from "@/types/ticket";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -18,6 +18,19 @@ import {
   changeTicketTitle,
 } from "@/services/ticket";
 import { TicketProperty } from "@/components/Property";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { Command, CommandItem } from "@/components/ui/command";
+import { ProjectContext } from "@/contexts/ProjectContext";
+import { PROPERTIES } from "@/constants/properties";
+import { DynamicIcon, type IconName } from "lucide-react/dynamic";
+import { useTranslation } from "react-i18next";
+import { createProjectProperty } from "@/services/project";
 
 interface Props {
   ticket: Ticket;
@@ -48,12 +61,24 @@ const onValueChange = async (
   await changeTicketPropertyValue(ticketId, propertyId, newValue);
 };
 
+const onPropertyCreate = async (
+  iconName: IconName,
+  propertyType: string,
+  projectId: number,
+  settings: string,
+) => {
+  await createProjectProperty(iconName, propertyType, projectId, settings);
+};
+
 export default function TicketModal({
   ticket,
   isOpen,
   setIsOpen,
   onTicketUpdated,
 }: Props) {
+  const { t } = useTranslation();
+  const project = useContext(ProjectContext);
+
   const [title, setTitle] = useState<string | undefined>(ticket?.title);
   const [description, setDescription] = useState<string | undefined>(
     ticket?.description,
@@ -101,10 +126,38 @@ export default function TicketModal({
                     onTicketUpdated,
                   )
                 }
+                onUpdate={onTicketUpdated}
                 key={index}
                 property={property}
               />
             ))}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button className={"h-[24px] justify-start"} variant={"ghost"}>
+                  <Plus /> Add property
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className={"w-[160px] p-0"}>
+                <Command>
+                  {PROPERTIES.map((property) => (
+                    <CommandItem
+                      onSelect={() =>
+                        onPropertyCreate(
+                          property.icon,
+                          property.type,
+                          project?.id,
+                          property.settings,
+                        ).then(onTicketUpdated)
+                      }
+                      key={property.type}
+                    >
+                      <DynamicIcon name={property.icon} />
+                      {t(`property.${property.type}`)}
+                    </CommandItem>
+                  ))}
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <Textarea

@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import type { Ticket } from "@/types/ticket";
-import { useTicketStatus } from "@/hooks/useTicketStatus";
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -15,11 +14,11 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 
 interface Props {
-  status: Ticket["status"];
+  status: string;
   tickets: Ticket[];
   activeTicket: Ticket | undefined;
   onTicketUpdated(): void;
-  createNewTicket(status: Ticket["status"]): void;
+  createNewTicket(status: string): void;
 }
 
 export default function TicketStack({
@@ -29,7 +28,6 @@ export default function TicketStack({
   onTicketUpdated,
   createNewTicket,
 }: Props) {
-  const params = useTicketStatus(status);
   const { setNodeRef } = useDroppable({
     id: `stack-${status}`,
     data: { status },
@@ -63,7 +61,8 @@ export default function TicketStack({
           ref={setNodeRef}
         >
           <div className={"flex gap-2"}>
-            <Badge variant={"outline"}>{params.text}</Badge> {tickets.length}
+            <Badge variant={"outline"}>{status || t("ticket.no_status")}</Badge>
+            {tickets.length}
           </div>
           {mappedTickets}
           <Button

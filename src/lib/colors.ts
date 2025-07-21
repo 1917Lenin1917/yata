@@ -1,17 +1,21 @@
-export type ColorName = "yellow" | "lime" | "blue";
+export type ColorName = "yellow" | "lime" | "blue" | "gray";
 export type Color = { primary: string; secondary: string };
 
 export const colors: Record<ColorName, Color> = {
   yellow: {
-    primary: "amber-200",
+    primary: "#fde68a",
     secondary: "",
   },
   lime: {
-    primary: "green-300",
+    primary: "#86efac",
     secondary: "",
   },
   blue: {
-    primary: "blue-400",
+    primary: "#60a5fa",
+    secondary: "",
+  },
+  gray: {
+    primary: "#9ca3af",
     secondary: "",
   },
 };

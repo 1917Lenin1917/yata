@@ -17,19 +17,36 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { colors } from "@/lib/colors";
+import { type ColorName, colors } from "@/lib/colors";
 import { Input } from "@/components/ui/input";
+import { changePropertySettings } from "@/services/project";
 
 interface Props {
   property: Property & { type: "status" };
   onNameChange(newName: string, propertyId: number): void;
   onValueChange(newValue: string, propertyId: number): void;
+  onUpdate(): void;
 }
+
+async function onNewOptionAdded(
+  propertyId: number,
+  optionName: string,
+  optionColor: ColorName,
+  settings: (Property & { type: "status" })["settings"],
+) {
+  await changePropertySettings(propertyId, {
+    ...settings,
+    options: [...settings.options, { value: optionName, color: optionColor }],
+  });
+}
+
 export function StatusProperty({
   property,
   onValueChange,
   onNameChange,
+  onUpdate,
 }: Props) {
+  const [input, setInput] = useState<string>("");
   const [name, setName] = useState<string>(property.name);
   const [value, setValue] = useState<string>(property.value);
 
@@ -51,7 +68,7 @@ export function StatusProperty({
     ];
   return (
     <>
-      <div className={"flex gap-1 "}>
+      <div className={"flex gap-1 pl-3"}>
         <DynamicIcon className={"h-4 w-4 self-center"} name={property.icon} />
         <Input
           className={
@@ -70,7 +87,7 @@ export function StatusProperty({
             className="w-[200px] h-[24px] justify-start p-0"
           >
             {value ? (
-              <Badge className={`bg-${color.primary}`}>{value}</Badge>
+              <Badge style={{ backgroundColor: color.primary }}>{value}</Badge>
             ) : (
               ""
             )}
@@ -78,7 +95,12 @@ export function StatusProperty({
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0">
           <Command>
-            <CommandInput placeholder="Search status..." className="h-9" />
+            <CommandInput
+              value={input}
+              onValueChange={setInput}
+              placeholder="Search status..."
+              className="h-9"
+            />
             <CommandList>
               <CommandEmpty>No status found...</CommandEmpty>
               <CommandGroup>
@@ -92,7 +114,9 @@ export function StatusProperty({
                       setOpen(false);
                     }}
                   >
-                    <Badge className={`bg-${colors[status.color].primary}`}>
+                    <Badge
+                      style={{ backgroundColor: colors[status.color].primary }}
+                    >
                       {status.value}
                     </Badge>
                     <DropdownMenu>
@@ -102,6 +126,29 @@ export function StatusProperty({
                     </DropdownMenu>
                   </CommandItem>
                 ))}
+                {input ? (
+                  <>
+                    <div>Or create new...</div>
+                    <CommandItem
+                      onSelect={async () => {
+                        await onNewOptionAdded(
+                          property.id,
+                          input,
+                          "gray",
+                          property.settings,
+                        );
+                        setInput("");
+                        onUpdate();
+                      }}
+                    >
+                      <Badge
+                        style={{ backgroundColor: colors["gray"].primary }}
+                      >
+                        {input}
+                      </Badge>
+                    </CommandItem>
+                  </>
+                ) : null}
               </CommandGroup>
             </CommandList>
           </Command>
@@ -109,4 +156,19 @@ export function StatusProperty({
       </Popover>
     </>
   );
+}
+
+interface StatusProps {
+  property: Property & { type: "status" };
+}
+
+export function DisplayStatus({ property }: StatusProps) {
+  const color =
+    colors[
+      property.settings.options.find((v) => v.value === property.value)
+        ?.color ?? "gray"
+    ];
+  return property.value ? (
+    <Badge style={{ backgroundColor: color.primary }}>{property.value}</Badge>
+  ) : null;
 }
