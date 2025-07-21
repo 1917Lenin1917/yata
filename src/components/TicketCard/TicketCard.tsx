@@ -35,9 +35,6 @@ export default function TicketCard({
   className,
   onTicketUpdated = () => {},
 }: Props) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: ticket.id, data: { id: ticket.id } });
-
   const { t } = useTranslation();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -52,6 +49,9 @@ export default function TicketCard({
     },
     [onTicketUpdated],
   );
+
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: ticket.id, data: { id: ticket.id }, disabled: isOpen });
 
   const style = {
     transform: CSS.Transform.toString(transform),

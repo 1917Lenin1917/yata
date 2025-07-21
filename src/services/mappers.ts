@@ -1,24 +1,44 @@
 import type { InferSelectModel } from "drizzle-orm";
-import { projects, tickets, users } from "@/db/schema";
+import {
+  projects,
+  properties,
+  propertyInstances,
+  tickets,
+  users,
+} from "@/db/schema";
 import type { Ticket } from "@/types/ticket";
 import type { User } from "@/types/user";
 import type { Project, ProjectWithTickets } from "@/types/project";
+import type { IconName } from "lucide-react/dynamic";
 
 type DtoTicket = InferSelectModel<typeof tickets>;
 type DtoUser = InferSelectModel<typeof users>;
 type DtoProject = InferSelectModel<typeof projects>;
+type DtoPropertyInstance = InferSelectModel<typeof propertyInstances>;
+type DtoProperty = InferSelectModel<typeof properties>;
 
 export const mapDtoToTicket = (
-  dto: DtoTicket & { author: DtoUser | null },
+  dto: DtoTicket & {
+    author: DtoUser;
+    properties: (DtoPropertyInstance & { property: DtoProperty })[];
+  },
 ): Ticket => ({
   id: dto.id || -1,
   description: dto.description || "",
-  author: dto.author ? mapDtoToUser(dto.author) : null,
+  author: mapDtoToUser(dto.author),
   title: dto.title || "",
   createdAt: dto.createdAt || "",
   updatedAt: dto.updatedAt || "",
   status: dto.status || "PENDING",
   priority: dto.priority || 0,
+  properties: dto.properties.map((property) => ({
+    id: property.propertyId,
+    icon: property.property.icon as IconName,
+    value: property.value ?? "",
+    name: property.property.name || "No name",
+    type: property.property.type ?? "text",
+    settings: property.property.settings as never,
+  })),
 });
 
 export const mapDtoToUser = (dto: DtoUser): User => ({
@@ -36,7 +56,12 @@ export const mapDtoToProject = (dto: DtoProject): Project => ({
 });
 
 export const mapDtoToProjectWithTickets = (
-  dto: DtoProject & { tickets: DtoTicket[] },
+  dto: DtoProject & {
+    tickets: (DtoTicket & {
+      author: DtoUser;
+      properties: (DtoPropertyInstance & { property: DtoProperty })[];
+    })[];
+  },
 ): ProjectWithTickets => ({
   id: dto.id,
   name: dto.name,

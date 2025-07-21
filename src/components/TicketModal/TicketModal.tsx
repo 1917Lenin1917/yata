@@ -11,16 +11,13 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useDebounce } from "@/hooks/useDebounce";
-import { changeTicketDescription, changeTicketTitle } from "@/services/ticket";
-import { BadgeAlert } from "lucide-react";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+  changeTicketDescription,
+  changeTicketPropertyName,
+  changeTicketPropertyValue,
+  changeTicketTitle,
+} from "@/services/ticket";
+import { TicketProperty } from "@/components/Property";
 
 interface Props {
   ticket: Ticket;
@@ -40,6 +37,17 @@ const onDescriptionChange = async (
   await changeTicketDescription(ticketId, newDescription);
 };
 
+const onNameChange = async (newName: string, propertyId: number) => {
+  await changeTicketPropertyName(propertyId, newName);
+};
+const onValueChange = async (
+  newValue: string,
+  propertyId: number,
+  ticketId: number,
+) => {
+  await changeTicketPropertyValue(ticketId, propertyId, newValue);
+};
+
 export default function TicketModal({
   ticket,
   isOpen,
@@ -55,43 +63,48 @@ export default function TicketModal({
   const debouncedDescription = useDebounce(description, 500);
 
   useEffect(() => {
+    if (debouncedTitle === ticket.title) return;
     onTitleChange(ticket.id, debouncedTitle ?? "").then(onTicketUpdated);
-  }, [debouncedTitle, onTicketUpdated, ticket.id]);
+  }, [debouncedTitle, onTicketUpdated, ticket.id, ticket.title]);
 
   useEffect(() => {
+    if (debouncedDescription === ticket.description) return;
     onDescriptionChange(ticket.id, debouncedDescription ?? "").then(
       onTicketUpdated,
     );
-  }, [debouncedDescription, onTicketUpdated, ticket.id]);
+  }, [debouncedDescription, onTicketUpdated, ticket.description, ticket.id]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent>
+      <DialogContent className={"lg:max-w-[800px] px-8"}>
         <DialogHeader>
           <DialogTitle></DialogTitle>
         </DialogHeader>
         <div className={"min-h-[300px] flex flex-col gap-8"}>
           <Input
-            className={"border-none bg-background! ring-0! text-3xl! h-10!"}
+            className={
+              "border-none bg-background! ring-0! text-3xl! h-10! p-0! shadow-none!"
+            }
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={"No title"}
           ></Input>
 
-          <div className={"flex gap-2 px-4"}>
-            <div className={"flex gap-1 text-xl justify-center items-center"}>
-              <BadgeAlert className={"h-5 w-5"} /> Status:
-            </div>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder={"Select a status"}></SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={"pending"}>
-                  <Badge className={"bg-blue-400"}>PENDING</Badge>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+          <div className={"grid grid-cols-[160px_1fr] gap-1"}>
+            {ticket.properties.map((property, index) => (
+              <TicketProperty
+                onNameChange={(newName, propertyId) =>
+                  onNameChange(newName, propertyId).then(onTicketUpdated)
+                }
+                onValueChange={(newValue, propertyId) =>
+                  onValueChange(newValue, propertyId, ticket.id).then(
+                    onTicketUpdated,
+                  )
+                }
+                key={index}
+                property={property}
+              />
+            ))}
           </div>
 
           <Textarea

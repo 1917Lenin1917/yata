@@ -21,6 +21,31 @@ export const users = sqliteTable("users", {
   password: text(),
 });
 
+export const properties = sqliteTable("properties", {
+  id: integer().primaryKey({ autoIncrement: true }),
+  projectId: integer()
+    .references(() => projects.id)
+    .notNull(),
+  icon: text().notNull().default(""),
+  name: text(),
+  type: text({
+    enum: ["text", "number", "status", "date", "checkbox", "select"],
+  }).default("text"),
+  settings: text({ mode: "json" }),
+  showOnTicketCard: integer({ mode: "boolean" }).default(false),
+});
+
+export const propertyInstances = sqliteTable("propertyInstances", {
+  ticketId: integer()
+    .references(() => tickets.id)
+    .notNull(),
+  propertyId: integer()
+    .references(() => properties.id)
+    .notNull(),
+
+  value: text(),
+});
+
 export const projects = sqliteTable("projects", {
   id: integer().primaryKey({ autoIncrement: true }),
   name: text().notNull(),
@@ -44,7 +69,7 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   }),
 }));
 
-export const ticketsRelations = relations(tickets, ({ one }) => ({
+export const ticketsRelations = relations(tickets, ({ one, many }) => ({
   author: one(users, {
     fields: [tickets.authorId],
     references: [users.id],
@@ -53,4 +78,23 @@ export const ticketsRelations = relations(tickets, ({ one }) => ({
     fields: [tickets.projectId],
     references: [projects.id],
   }),
+  properties: many(propertyInstances),
+}));
+
+export const propertyInstancesRelations = relations(
+  propertyInstances,
+  ({ one }) => ({
+    ticket: one(tickets, {
+      fields: [propertyInstances.ticketId],
+      references: [tickets.id],
+    }),
+    property: one(properties, {
+      fields: [propertyInstances.propertyId],
+      references: [properties.id],
+    }),
+  }),
+);
+
+export const propertiesRelations = relations(properties, ({ many }) => ({
+  instance: many(propertyInstances),
 }));

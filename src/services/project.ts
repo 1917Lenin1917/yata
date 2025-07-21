@@ -27,7 +27,16 @@ export const getProjectWithTickets = async (projectId: number) => {
   try {
     const data = await db.query.projects.findFirst({
       with: {
-        tickets: true,
+        tickets: {
+          with: {
+            author: true,
+            properties: {
+              with: {
+                property: true,
+              },
+            },
+          },
+        },
       },
       where: eq(projects.id, projectId),
     });

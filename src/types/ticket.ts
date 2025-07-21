@@ -1,4 +1,5 @@
 import type { User } from "@/types/user";
+import type { Property } from "@/types/property";
 
 export interface Ticket {
   id: number;
@@ -9,4 +10,5 @@ export interface Ticket {
   updatedAt: string;
   status: "PENDING" | "IN_PROGRESS" | "DONE";
   priority: number;
+  properties: Property[];
 }

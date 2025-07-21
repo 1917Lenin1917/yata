@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "a36dc881-bde2-4274-b1c6-a9af6f19ea3d",
-  "prevId": "e72a8dab-755d-43e1-bb6a-822aa49d0c70",
+  "id": "6d69acd2-f15a-4825-a042-ff94af0cdff6",
+  "prevId": "a36dc881-bde2-4274-b1c6-a9af6f19ea3d",
   "tables": {
     "projects": {
       "name": "projects",
@@ -53,6 +53,111 @@
           "tableTo": "users",
           "columnsFrom": [
             "authorId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "properties": {
+      "name": "properties",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'text'"
+        },
+        "settings": {
+          "name": "settings",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "showOnTicketCard": {
+          "name": "showOnTicketCard",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "propertyInstances": {
+      "name": "propertyInstances",
+      "columns": {
+        "ticketId": {
+          "name": "ticketId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "propertyId": {
+          "name": "propertyId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "propertyInstances_ticketId_ticket_id_fk": {
+          "name": "propertyInstances_ticketId_ticket_id_fk",
+          "tableFrom": "propertyInstances",
+          "tableTo": "ticket",
+          "columnsFrom": [
+            "ticketId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "propertyInstances_propertyId_properties_id_fk": {
+          "name": "propertyInstances_propertyId_properties_id_fk",
+          "tableFrom": "propertyInstances",
+          "tableTo": "properties",
+          "columnsFrom": [
+            "propertyId"
           ],
           "columnsTo": [
             "id"
@@ -217,9 +322,7 @@
   "_meta": {
     "schemas": {},
     "tables": {},
-    "columns": {
-      "\"ticket\".\"date\"": "\"ticket\".\"createdAt\""
-    }
+    "columns": {}
   },
   "internal": {
     "indexes": {}

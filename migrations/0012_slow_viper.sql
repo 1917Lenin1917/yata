@@ -1,0 +1,1 @@
+ALTER TABLE `properties` ADD `projectId` integer NOT NULL DEFAULT 0 REFERENCES projects(id);
