@@ -14,7 +14,7 @@ export default async function ProjectPage(props: Props) {
   if (!project) notFound();
 
   return (
-    <div className={"my-8"}>
+    <div className={"my-8 mx-8"}>
       <div className={"px-8 text-4xl"}>
         {project.emoji} {project.name}
       </div>

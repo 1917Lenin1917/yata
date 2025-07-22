@@ -14,7 +14,7 @@ import TicketStack from "@/components/TicketStack";
 import { useTicketsPage } from "@/hooks/useTicketsPage";
 import type { ProjectWithTickets } from "@/types/project";
 import { Separator } from "@/components/ui/separator";
-import { Check, Funnel } from "lucide-react";
+import { Check, Funnel, FunnelPlus, FunnelX } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -26,6 +26,7 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { createTicket } from "@/services/ticket";
 import { ProjectContext } from "@/contexts/ProjectContext";
+import { Badge } from "@/components/ui/badge";
 
 interface Props {
   project: ProjectWithTickets;
@@ -92,13 +93,14 @@ export default function ProjectPage({ project }: Props) {
 
   return (
     <ProjectContext.Provider value={project}>
-      <div className={"w-full  flex justify-between"}>
+      <div className={"w-full flex justify-between"}>
         <div></div>
-        <div>
+        <div className={""}>
+          {groupBy && <Badge className={"my-auto"}> {groupBy.name}</Badge>}
           <Popover>
             <PopoverTrigger asChild>
               <Button variant={"ghost"} className={"cursor-pointer"}>
-                <Funnel />
+                {groupBy ? <FunnelX /> : <Funnel />}
               </Button>
             </PopoverTrigger>
             <PopoverContent className={"p-0"}>
@@ -135,21 +137,23 @@ export default function ProjectPage({ project }: Props) {
         </div>
       </div>
       <Separator />
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-      >
-        <div className={"p-8 flex flex-row gap-4 h-full"}>{stacks}</div>
+      <div className={"overflow-x-auto"}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          <div className={"p-8 flex flex-row gap-4 h-full"}>{stacks}</div>
 
-        <DragOverlay dropAnimation={null}>
-          {activeTicket ? (
-            <TicketCard ticket={activeTicket}></TicketCard>
-          ) : null}
-        </DragOverlay>
-      </DndContext>
+          <DragOverlay dropAnimation={null}>
+            {activeTicket ? (
+              <TicketCard ticket={activeTicket}></TicketCard>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+      </div>
     </ProjectContext.Provider>
   );
 }

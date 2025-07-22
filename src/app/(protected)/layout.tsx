@@ -10,7 +10,7 @@ export default function ProtectedLayout({ children }: Props) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className={"mx-auto"}>{children}</main>
+      <main className={"mx-auto max-w-[calc(100%-256px)]"}>{children}</main>
     </SidebarProvider>
   );
 }

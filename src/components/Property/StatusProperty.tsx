@@ -15,11 +15,16 @@ import { MoreHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { type ColorName, colors } from "@/lib/colors";
 import { Input } from "@/components/ui/input";
 import { changePropertySettings } from "@/services/project";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface Props {
   property: Property & { type: "status" };
@@ -40,6 +45,46 @@ async function onNewOptionAdded(
   });
 }
 
+async function onColorChange(
+  propertyId: number,
+  optionName: string,
+  optionColor: ColorName,
+  settings: (Property & { type: "status" })["settings"],
+) {
+  const changedProperty = settings.options.findIndex(
+    (opt) => opt.value === optionName,
+  );
+  await changePropertySettings(propertyId, {
+    ...settings,
+    options: [
+      ...settings.options.with(changedProperty, {
+        value: optionName,
+        color: optionColor,
+      }),
+    ],
+  });
+}
+
+async function onValueNameChange(
+  propertyId: number,
+  oldName: string,
+  newName: string,
+  settings: (Property & { type: "status" })["settings"],
+) {
+  const changedProperty = settings.options.findIndex(
+    (opt) => opt.value === oldName,
+  );
+  await changePropertySettings(propertyId, {
+    ...settings,
+    options: [
+      ...settings.options.with(changedProperty, {
+        value: newName,
+        color: settings.options[changedProperty].color,
+      }),
+    ],
+  });
+}
+
 export function StatusProperty({
   property,
   onValueChange,
@@ -49,8 +94,12 @@ export function StatusProperty({
   const [input, setInput] = useState<string>("");
   const [name, setName] = useState<string>(property.name);
   const [value, setValue] = useState<string>(property.value);
+  const [oldValueName, setOldValueName] = useState<string>("");
+  const [valueName, setValueName] = useState<string>("");
 
   const [open, setOpen] = useState(false);
+
+  const debouncedValueName = useDebounce(valueName, 500);
 
   useEffect(() => {
     if (name === property.name) return;
@@ -61,6 +110,17 @@ export function StatusProperty({
     if (value === property.value) return;
     onValueChange(value, property.id);
   }, [value]);
+
+  useEffect(() => {
+    if (!debouncedValueName) return;
+
+    onValueNameChange(
+      property.id,
+      oldValueName,
+      debouncedValueName,
+      property.settings,
+    ).then(onUpdate);
+  }, [debouncedValueName]);
 
   const color =
     colors[
@@ -106,7 +166,9 @@ export function StatusProperty({
               <CommandGroup>
                 {property.settings.options.map((status) => (
                   <CommandItem
-                    className={"justify-between"}
+                    className={
+                      "justify-between has-[button:hover]:!bg-transparent has-[button[data-state=open]]:!bg-transparent"
+                    }
                     key={status.value}
                     value={status.value}
                     onSelect={(currentValue) => {
@@ -119,10 +181,50 @@ export function StatusProperty({
                     >
                       {status.value}
                     </Badge>
-                    <DropdownMenu>
+                    <DropdownMenu
+                      onOpenChange={(op) => {
+                        if (op) {
+                          setValueName(status.value);
+                          setOldValueName(status.value);
+                        }
+                      }}
+                    >
                       <DropdownMenuTrigger asChild>
-                        <MoreHorizontal />
+                        <Button variant={"ghost"} className={"p-0 w-fit h-fit"}>
+                          <MoreHorizontal />
+                        </Button>
                       </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        side={"right"}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Input
+                          value={valueName}
+                          onChange={(e) => setValueName(e.target.value)}
+                        />
+                        <DropdownMenuGroup>
+                          <DropdownMenuLabel>Color</DropdownMenuLabel>
+                          {Object.entries(colors).map(([key, value]) => (
+                            <DropdownMenuItem
+                              key={key}
+                              onSelect={(e) => {
+                                onColorChange(
+                                  property.id,
+                                  status.value,
+                                  key as ColorName,
+                                  property.settings,
+                                ).then(onUpdate);
+                                e.stopPropagation();
+                                e.preventDefault();
+                              }}
+                            >
+                              <Badge style={{ backgroundColor: value.primary }}>
+                                {key}
+                              </Badge>
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
                     </DropdownMenu>
                   </CommandItem>
                 ))}
