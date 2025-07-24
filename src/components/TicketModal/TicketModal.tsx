@@ -115,7 +115,7 @@ export default function TicketModal({
             placeholder={"No title"}
           ></Input>
 
-          <div className={"grid grid-cols-[160px_1fr] gap-1"}>
+          <div className={"grid grid-cols-[200px_1fr] gap-1"}>
             {ticket.properties.map((property, index) => (
               <TicketProperty
                 onNameChange={(newName, propertyId) =>

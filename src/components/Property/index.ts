@@ -1,3 +1,3 @@
-export * from "./TextProperty";
+export * from "./Text/TextProperty";
 export * from "./TicketProperty";
-export * from "./StatusProperty";
+export * from "./Status/StatusProperty";

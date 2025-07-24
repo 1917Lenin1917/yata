@@ -1,6 +1,11 @@
 import type { IconName } from "lucide-react/dynamic";
 import type { ColorName } from "@/lib/colors";
 
+export type SelectOption = {
+  value: string;
+  color: ColorName;
+};
+
 export type Property = {
   id: number;
   icon: IconName;
@@ -36,10 +41,7 @@ export type Property = {
   | {
       type: "status";
       settings: {
-        options: {
-          value: string;
-          color: ColorName;
-        }[];
+        options: SelectOption[];
       };
     }
 );

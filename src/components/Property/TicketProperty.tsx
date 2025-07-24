@@ -1,9 +1,10 @@
 import type { Property } from "@/types/property";
-import { TextProperty } from "@/components/Property/TextProperty";
+import { TextProperty } from "@/components/Property/Text/TextProperty";
 import {
   DisplayStatus,
   StatusProperty,
-} from "@/components/Property/StatusProperty";
+} from "@/components/Property/Status/StatusProperty";
+import { PropertyContext } from "@/contexts/PropertyContext";
 
 interface Props {
   property: Property;
@@ -12,29 +13,29 @@ interface Props {
   onUpdate(): void;
 }
 
+const propertyTypeToComponent = {
+  text: TextProperty,
+  status: StatusProperty,
+  number: TextProperty,
+  date: TextProperty,
+  select: TextProperty,
+  checkbox: TextProperty,
+};
+
 export function TicketProperty({
   property,
   onNameChange,
   onValueChange,
   onUpdate,
 }: Props) {
-  if (property.type === "text")
-    return (
-      <TextProperty
-        property={property}
-        onNameChange={onNameChange}
-        onValueChange={onValueChange}
-      />
-    );
-  if (property.type === "status")
-    return (
-      <StatusProperty
-        property={property}
-        onNameChange={onNameChange}
-        onValueChange={onValueChange}
-        onUpdate={onUpdate}
-      />
-    );
+  const Component = propertyTypeToComponent[property.type];
+  return (
+    <PropertyContext.Provider
+      value={{ property, onUpdate, onNameChange, onValueChange }}
+    >
+      <Component />
+    </PropertyContext.Provider>
+  );
 }
 
 export function DisplayProperty({ property }: { property: Property }) {
