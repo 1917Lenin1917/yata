@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { LOCALES } from "@/constants/locale";
 
 export default function LangSwitcher() {
+  "use no memo";
   const { i18n } = useTranslation();
   const [mounted, setMounted] = useState(false);
 

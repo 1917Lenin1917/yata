@@ -7,7 +7,8 @@
       "no_title": "Без названия",
       "no_description": "",
       "create": "Создать",
-      "no_status": "Нет статуса"
+      "no_status": "Нет статуса",
+      "add_property": "Добавить свойство"
     },
     "sidebar": {
       "projects": "Проекты",

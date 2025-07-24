@@ -9,7 +9,6 @@ import {
 import type { Ticket } from "@/types/ticket";
 import { useContext, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useDebounce } from "@/hooks/useDebounce";
 import {
   changeTicketDescription,
@@ -32,6 +31,8 @@ import { DynamicIcon, type IconName } from "lucide-react/dynamic";
 import { useTranslation } from "react-i18next";
 import { createProjectProperty } from "@/services/project";
 import type { Property } from "@/types/property";
+import { type EditorEvents } from "@tiptap/react";
+import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 
 interface Props {
   ticket: Ticket;
@@ -81,12 +82,15 @@ export default function TicketModal({
   const project = useContext(ProjectContext);
 
   const [title, setTitle] = useState<string | undefined>(ticket?.title);
-  const [description, setDescription] = useState<string | undefined>(
-    ticket?.description,
-  );
+  const [desc, setDesc] = useState<string | undefined>(ticket.description);
 
   const debouncedTitle = useDebounce(title, 500);
-  const debouncedDescription = useDebounce(description, 500);
+  const debouncedDesc = useDebounce(desc, 500);
+
+  const onDescriptionUpdate = ({ editor }: EditorEvents["update"]) => {
+    const description = editor.getJSON();
+    setDesc(JSON.stringify(description));
+  };
 
   useEffect(() => {
     if (debouncedTitle === ticket.title) return;
@@ -94,17 +98,15 @@ export default function TicketModal({
   }, [debouncedTitle, onTicketUpdated, ticket.id, ticket.title]);
 
   useEffect(() => {
-    if (debouncedDescription === ticket.description) return;
-    onDescriptionChange(ticket.id, debouncedDescription ?? "").then(
-      onTicketUpdated,
-    );
-  }, [debouncedDescription, onTicketUpdated, ticket.description, ticket.id]);
+    if (debouncedDesc === ticket.description) return;
+    onDescriptionChange(ticket.id, debouncedDesc ?? "").then(onTicketUpdated);
+  }, [debouncedDesc, onTicketUpdated, ticket.description, ticket.id]);
 
   if (!project) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className={"lg:max-w-[800px] px-8"}>
+      <DialogContent className={"lg:max-w-[840px] px-8"}>
         <DialogHeader>
           <DialogTitle></DialogTitle>
         </DialogHeader>
@@ -137,7 +139,7 @@ export default function TicketModal({
             <Popover>
               <PopoverTrigger asChild>
                 <Button className={"h-[24px] justify-start"} variant={"ghost"}>
-                  <Plus /> Add property
+                  <Plus /> {t("ticket.add_property")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className={"w-[160px] p-0"}>
@@ -163,12 +165,16 @@ export default function TicketModal({
             </Popover>
           </div>
 
-          <Textarea
-            className={"bg-background! ring-0! text-xl! min-h-40"}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder={t("ticket.no_description")}
-          ></Textarea>
+          <SimpleEditor
+            content={desc ? JSON.parse(desc) : undefined}
+            onUpdate={onDescriptionUpdate}
+          />
+          {/*<Textarea*/}
+          {/*  className={"bg-background! ring-0! text-xl! min-h-40"}*/}
+          {/*  value={description}*/}
+          {/*  onChange={(e) => setDescription(e.target.value)}*/}
+          {/*  placeholder={t("ticket.no_description")}*/}
+          {/*></Textarea>*/}
         </div>
       </DialogContent>
     </Dialog>

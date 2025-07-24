@@ -7,7 +7,8 @@
       "no_title": "No title",
       "no_description": "",
       "create": "Create a new ticket",
-      "no_status": "None"
+      "no_status": "None",
+      "add_property": "Add property"
     },
     "sidebar": {
       "projects": "Projects",
