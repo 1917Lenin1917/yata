@@ -9,12 +9,12 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import TicketStack from "@/components/TicketStack";
 import { useTicketsPage } from "@/hooks/useTicketsPage";
 import type { ProjectWithTickets } from "@/types/project";
 import { Separator } from "@/components/ui/separator";
-import { Check, Funnel, FunnelPlus, FunnelX } from "lucide-react";
+import { Check, Funnel, FunnelX } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -63,22 +63,19 @@ export default function ProjectPage({ project }: Props) {
     localStorage.setItem("groupBy", `${groupBy.id}`);
   }, [groupBy, project.properties, setGroupBy]);
 
-  const createNewTicket = useCallback(
-    (status: string) => {
-      createTicket({
-        title: "",
-        desc: "",
-        projectId: project.id,
-        property: groupBy
-          ? {
-              id: groupBy.id,
-              value: status,
-            }
-          : undefined,
-      }).then(onTicketUpdated);
-    },
-    [groupBy, onTicketUpdated, project.id],
-  );
+  const createNewTicket = (status: string) => {
+    createTicket({
+      title: "",
+      desc: "",
+      projectId: project.id,
+      property: groupBy
+        ? {
+            id: groupBy.id,
+            value: status,
+          }
+        : undefined,
+    }).then(onTicketUpdated);
+  };
 
   const stacks = Object.entries(groupedTickets).map(([value, arr]) => (
     <TicketStack

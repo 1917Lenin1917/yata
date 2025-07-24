@@ -3,7 +3,7 @@
 import { Card, CardAction, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Ticket } from "@/types/ticket";
 import { cn } from "@/lib/utils";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import TicketModal from "@/components/TicketModal";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
@@ -31,12 +31,9 @@ export default function TicketCard({
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleDeleteTicket = useCallback(
-    (ticketId: number) => {
-      deleteTicket(ticketId).then(onTicketUpdated);
-    },
-    [onTicketUpdated],
-  );
+  const handleDeleteTicket = (ticketId: number) => {
+    deleteTicket(ticketId).then(onTicketUpdated);
+  };
 
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: ticket.id, data: { id: ticket.id }, disabled: isOpen });

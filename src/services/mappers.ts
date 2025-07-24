@@ -53,6 +53,7 @@ export const mapDtoToProject = (dto: DtoProject): Project => ({
   name: dto.name,
   description: dto.description,
   emoji: dto.emoji,
+  properties: [],
 });
 
 export const mapDtoToProjectWithTickets = (

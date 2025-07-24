@@ -31,6 +31,7 @@ import { PROPERTIES } from "@/constants/properties";
 import { DynamicIcon, type IconName } from "lucide-react/dynamic";
 import { useTranslation } from "react-i18next";
 import { createProjectProperty } from "@/services/project";
+import type { Property } from "@/types/property";
 
 interface Props {
   ticket: Ticket;
@@ -63,7 +64,7 @@ const onValueChange = async (
 
 const onPropertyCreate = async (
   iconName: IconName,
-  propertyType: string,
+  propertyType: Property["type"],
   projectId: number,
   settings: string,
 ) => {
@@ -99,6 +100,8 @@ export default function TicketModal({
     );
   }, [debouncedDescription, onTicketUpdated, ticket.description, ticket.id]);
 
+  if (!project) return null;
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className={"lg:max-w-[800px] px-8"}>
@@ -112,7 +115,7 @@ export default function TicketModal({
             }
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder={"No title"}
+            placeholder={t("ticket.no_title")}
           ></Input>
 
           <div className={"grid grid-cols-[200px_1fr] gap-1"}>
@@ -145,14 +148,14 @@ export default function TicketModal({
                         onPropertyCreate(
                           property.icon,
                           property.type,
-                          project?.id,
-                          property.settings,
+                          project.id,
+                          property.settings as never,
                         ).then(onTicketUpdated)
                       }
                       key={property.type}
                     >
                       <DynamicIcon name={property.icon} />
-                      {t(`property.${property.type}`)}
+                      {t(`property.${property.type}.name`)}
                     </CommandItem>
                   ))}
                 </Command>
@@ -164,7 +167,7 @@ export default function TicketModal({
             className={"bg-background! ring-0! text-xl! min-h-40"}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder={"No description"}
+            placeholder={t("ticket.no_description")}
           ></Textarea>
         </div>
       </DialogContent>

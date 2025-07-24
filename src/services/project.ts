@@ -14,6 +14,7 @@ import {
   mapDtoToProject,
   mapDtoToProjectWithTickets,
 } from "@/services/mappers";
+import type { Property } from "@/types/property";
 
 export const getCurrentUserProjects = async () => {
   const user = await getCurrentUser();
@@ -76,7 +77,7 @@ export const createNewProject = async (payload: CreateNewProjectPayload) => {
 
 export const createProjectProperty = async (
   iconName: string,
-  propertyType: string,
+  propertyType: Property["type"],
   projectId: number,
   settings: string,
 ) => {

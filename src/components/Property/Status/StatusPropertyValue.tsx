@@ -1,14 +1,13 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { PropertyContext } from "@/contexts/PropertyContext";
-import type { Property, SelectOption } from "@/types/property";
-import { type Color, type ColorName, colors } from "@/lib/colors";
+import type { Property } from "@/types/property";
+import { type ColorName } from "@/lib/colors";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Command,
   CommandGroup,
@@ -18,6 +17,8 @@ import {
 } from "@/components/ui/command";
 import { changePropertySettings } from "@/services/project";
 import { StatusPropertyOptionsDropdown } from "@/components/Property/Status/StatusPropertyOptionsDropdown";
+import { ColorBadge } from "@/components/ColorBadge";
+import { useTranslation } from "react-i18next";
 
 async function onNewOptionAdded(
   propertyId: number,
@@ -35,42 +36,33 @@ export function StatusPropertyValue() {
   const { onUpdate, onValueChange, ...ctx } = useContext(PropertyContext);
   const property = ctx.property as Property & { type: "status" };
 
+  const { t } = useTranslation();
+
   const [input, setInput] = useState<string>("");
   const [value, setValue] = useState<string>(property.value);
   const [open, setOpen] = useState<boolean>(false);
 
-  const selectedOption = useMemo<SelectOption | undefined>(
-    () => property.settings.options.find((option) => option.value === value),
-    [property, value],
+  const selectedOption = property.settings.options.find(
+    (option) => option.value === value,
   );
 
-  const color = useMemo<Color>(
-    () => colors[selectedOption?.color || "gray"],
-    [selectedOption],
+  const color = selectedOption?.color || "gray";
+
+  const showCreateNew = !!(
+    input &&
+    property.settings.options.findIndex((opt) => opt.value === input) === -1
   );
 
-  const showCreateNew = useMemo<boolean>(
-    () =>
-      !!(
-        input &&
-        property.settings.options.findIndex((opt) => opt.value === input) === -1
-      ),
-    [input, property.settings.options],
-  );
+  const onSelect = (currentValue: string) => {
+    setValue(currentValue === value ? "" : currentValue);
+    setOpen(false);
+  };
 
-  const onSelect = useCallback(
-    (currentValue: string) => {
-      setValue(currentValue === value ? "" : currentValue);
-      setOpen(false);
-    },
-    [value],
-  );
-
-  const onNewOptionSelect = useCallback(async () => {
+  const onNewOptionSelect = async () => {
     await onNewOptionAdded(property.id, input, "gray", property.settings);
     setInput("");
     onUpdate();
-  }, [input, onUpdate, property.id, property.settings]);
+  };
 
   useEffect(() => {
     if (value === property.value) return;
@@ -86,9 +78,7 @@ export function StatusPropertyValue() {
           aria-expanded={open}
           className="w-[200px] h-[24px] justify-start p-0"
         >
-          {value && (
-            <Badge style={{ backgroundColor: color.primary }}>{value}</Badge>
-          )}
+          {value && <ColorBadge colorName={color}>{value}</ColorBadge>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
@@ -96,7 +86,7 @@ export function StatusPropertyValue() {
           <CommandInput
             value={input}
             onValueChange={setInput}
-            placeholder="Search status..."
+            placeholder={t("property.status.options.search")}
             className="h-9"
           />
           <CommandList>
@@ -110,11 +100,9 @@ export function StatusPropertyValue() {
                   value={status.value}
                   onSelect={onSelect}
                 >
-                  <Badge
-                    style={{ backgroundColor: colors[status.color].primary }}
-                  >
+                  <ColorBadge colorName={status.color}>
                     {status.value}
-                  </Badge>
+                  </ColorBadge>
                   <StatusPropertyOptionsDropdown status={status} />
                 </CommandItem>
               ))}
@@ -122,9 +110,7 @@ export function StatusPropertyValue() {
             {showCreateNew && (
               <CommandGroup heading={"Create new"} forceMount>
                 <CommandItem onSelect={onNewOptionSelect}>
-                  <Badge style={{ backgroundColor: colors["gray"].primary }}>
-                    {input}
-                  </Badge>
+                  <ColorBadge colorName={"gray"}>{input}</ColorBadge>
                 </CommandItem>
               </CommandGroup>
             )}

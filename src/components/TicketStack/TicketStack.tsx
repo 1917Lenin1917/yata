@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import type { Ticket } from "@/types/ticket";
 import {
@@ -35,20 +34,6 @@ export default function TicketStack({
 
   const { t } = useTranslation();
 
-  const mappedTickets = useMemo(
-    () =>
-      tickets.map((ticket, idx) => (
-        <TicketCard
-          isActive={ticket.id === activeTicket?.id}
-          className={"cursor-pointer"}
-          key={idx}
-          ticket={ticket}
-          onTicketUpdated={onTicketUpdated}
-        ></TicketCard>
-      )),
-    [onTicketUpdated, tickets, activeTicket],
-  );
-
   return (
     <div className={"grow basis-0 shrink-0 min-w-[316px]"}>
       <SortableContext
@@ -64,7 +49,15 @@ export default function TicketStack({
             <Badge variant={"outline"}>{status || t("ticket.no_status")}</Badge>
             {tickets.length}
           </div>
-          {mappedTickets}
+          {tickets.map((ticket, idx) => (
+            <TicketCard
+              isActive={ticket.id === activeTicket?.id}
+              className={"cursor-pointer"}
+              key={idx}
+              ticket={ticket}
+              onTicketUpdated={onTicketUpdated}
+            ></TicketCard>
+          ))}
           <Button
             variant={"outline"}
             onClick={() => createNewTicket(status)}

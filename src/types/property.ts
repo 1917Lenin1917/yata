@@ -15,11 +15,11 @@ export type Property = {
 } & (
   | {
       type: "text";
-      settings: {};
+      settings: object;
     }
   | {
       type: "date";
-      settings: {};
+      settings: object;
     }
   | {
       type: "number";

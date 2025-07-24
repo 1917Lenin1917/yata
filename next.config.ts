@@ -9,4 +9,8 @@ const withSerwist = withSerwistInit({
   disable: process.env.NODE_ENV !== "production",
 });
 
-export default withSerwist({});
+export default withSerwist({
+  experimental: {
+    reactCompiler: true,
+  },
+});

@@ -1,8 +1,7 @@
 import type { Property } from "@/types/property";
-import { Badge } from "@/components/ui/badge";
-import { colors } from "@/lib/colors";
 import { PropertyNameBlock } from "@/components/Property/NameBlock";
 import { StatusPropertyValue } from "@/components/Property/Status/StatusPropertyValue";
+import { ColorBadge } from "@/components/ColorBadge";
 
 export function StatusProperty() {
   return (
@@ -19,11 +18,9 @@ interface StatusProps {
 
 export function DisplayStatus({ property }: StatusProps) {
   const color =
-    colors[
-      property.settings.options.find((v) => v.value === property.value)
-        ?.color ?? "gray"
-    ];
+    property.settings.options.find((v) => v.value === property.value)?.color ??
+    "gray";
   return property.value ? (
-    <Badge style={{ backgroundColor: color.primary }}>{property.value}</Badge>
+    <ColorBadge colorName={color}>{property.value}</ColorBadge>
   ) : null;
 }

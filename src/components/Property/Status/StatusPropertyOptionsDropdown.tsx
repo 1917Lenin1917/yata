@@ -10,11 +10,12 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { type ColorName, colors } from "@/lib/colors";
-import { Badge } from "@/components/ui/badge";
 import type { Property, SelectOption } from "@/types/property";
 import { changePropertySettings } from "@/services/project";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { PropertyContext } from "@/contexts/PropertyContext";
+import { useTranslation } from "react-i18next";
+import { ColorBadge } from "@/components/ColorBadge";
 
 async function onColorChange(
   propertyId: number,
@@ -75,6 +76,8 @@ export function StatusPropertyOptionsDropdown({ status }: Props) {
   const { onUpdate, ...ctx } = useContext(PropertyContext);
   const property = ctx.property as Property & { type: "status" };
 
+  const { t } = useTranslation();
+
   const [statusValue, setStatusValue] = useState<string>(status.value);
 
   useEffect(() => {
@@ -88,47 +91,26 @@ export function StatusPropertyOptionsDropdown({ status }: Props) {
     ).then(onUpdate);
   }, [statusValue]);
 
-  const onOpenChange = useCallback(
-    (open: boolean) => {
-      if (!open) return;
-      setStatusValue(status.value);
-    },
-    [status.value],
-  );
+  const onOpenChange = (open: boolean) => {
+    if (!open) return;
+    setStatusValue(status.value);
+  };
 
-  const onSelect = useCallback(
-    (event: Event, newColorName: ColorName) => {
-      onColorChange(
-        property.id,
-        status.value,
-        newColorName,
-        property.settings,
-      ).then(onUpdate);
-      event.stopPropagation();
-      event.preventDefault();
-    },
-    [onUpdate, property.id, property.settings, status.value],
-  );
+  const onSelect = (event: Event, newColorName: ColorName) => {
+    onColorChange(
+      property.id,
+      status.value,
+      newColorName,
+      property.settings,
+    ).then(onUpdate);
+    event.stopPropagation();
+    event.preventDefault();
+  };
 
-  const onDeleteClick = useCallback(async () => {
+  const onDeleteClick = async () => {
     await onValueDelete(property.id, status.value, property.settings);
     onUpdate();
-  }, [onUpdate, property.id, property.settings, status.value]);
-
-  const colorOptions = useMemo(
-    () =>
-      Object.entries(colors).map(([colorName, colorValue], idx) => (
-        <DropdownMenuItem
-          key={idx}
-          onSelect={(event) => onSelect(event, colorName as ColorName)}
-        >
-          <Badge style={{ backgroundColor: colorValue.primary }}>
-            {colorName}
-          </Badge>
-        </DropdownMenuItem>
-      )),
-    [onSelect],
-  );
+  };
 
   return (
     <DropdownMenu onOpenChange={onOpenChange}>
@@ -143,8 +125,19 @@ export function StatusPropertyOptionsDropdown({ status }: Props) {
           onChange={(e) => setStatusValue(e.target.value)}
         />
         <DropdownMenuGroup>
-          <DropdownMenuLabel>Color</DropdownMenuLabel>
-          {colorOptions}
+          <DropdownMenuLabel>
+            {t("property.status.options.color")}
+          </DropdownMenuLabel>
+          {Object.keys(colors).map((colorName, idx) => (
+            <DropdownMenuItem
+              key={idx}
+              onSelect={(event) => onSelect(event, colorName as ColorName)}
+            >
+              <ColorBadge colorName={colorName as ColorName}>
+                {t(`color.${colorName}`)}
+              </ColorBadge>
+            </DropdownMenuItem>
+          ))}
         </DropdownMenuGroup>
         <DropdownMenuGroup>
           <Button
@@ -152,7 +145,7 @@ export function StatusPropertyOptionsDropdown({ status }: Props) {
             className={"w-full cursor-pointer"}
             onClick={onDeleteClick}
           >
-            Delete
+            {t("property.status.options.delete")}
           </Button>
         </DropdownMenuGroup>
       </DropdownMenuContent>

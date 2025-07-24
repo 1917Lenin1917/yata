@@ -5,6 +5,7 @@
     },
     "ticket": {
       "no_title": "No title",
+      "no_description": "",
       "create": "Create a new ticket",
       "no_status": "None"
     },
@@ -13,11 +14,46 @@
       "create_project": "Create a new project"
     },
     "property": {
-      "text": "Text",
-      "number": "Number",
-      "date": "Date",
-      "status": "Status"
+      "text": {
+        "name": "Text"
+      },
+      "number": {
+        "name": "Number"
+      },
+      "date": {
+        "name": "Date"
+      },
+      "status": {
+        "name": "Status",
+        "options": {
+          "color": "Color",
+          "delete": "Delete",
+          "search": "Search status..."
+        }
+      }
+    },
+    "color": {
+      "color": "Color",
+      "yellow": "Yellow",
+      "lime": "Lime",
+      "blue": "Blue",
+      "gray": "Gray",
+      "rose": "Rose",
+      "red": "Red",
+      "orange": "Orange",
+      "amber": "Amber",
+      "emerald": "Emerald",
+      "teal": "Teal",
+      "cyan": "Cyan",
+      "sky": "Sky",
+      "indigo": "Indigo",
+      "violet": "Violet",
+      "purple": "Purple",
+      "fuchsia": "Fuchsia",
+      "stone": "Stone",
+      "neutral": "Neutral",
+      "slate": "Slate",
+      "zinc": "Zinc"
     }
   }
-
 }

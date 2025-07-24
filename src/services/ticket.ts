@@ -82,6 +82,8 @@ export const createTicket = async (body: CreateTicket) => {
     where: eq(properties.projectId, body.projectId),
   });
 
+  if (!projectProperties.length) return;
+
   await db.insert(propertyInstances).values(
     projectProperties.map((property) => ({
       ticketId: ticket.id,

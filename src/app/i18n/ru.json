@@ -5,12 +5,54 @@
     },
     "ticket": {
       "no_title": "Без названия",
+      "no_description": "",
       "create": "Создать",
       "no_status": "Нет статуса"
     },
     "sidebar": {
       "projects": "Проекты",
       "create_project": "Создать новый проект"
+    },
+    "property": {
+      "text": {
+        "name": "Текст"
+      },
+      "number": {
+        "name": "Число"
+      },
+      "date": {
+        "name": "Дата"
+      },
+      "status": {
+        "name": "Статус",
+        "options": {
+          "color": "Цвет",
+          "delete": "Удалить",
+          "search": "Найти статус..."
+        }
+      }
+    },
+    "color": {
+      "yellow": "Жёлтый",
+      "lime": "Лаймовый",
+      "blue": "Синий",
+      "gray": "Серый",
+      "rose": "Розовый",
+      "red": "Красный",
+      "orange": "Оранжевый",
+      "amber": "Янтарный",
+      "emerald": "Изумрудный",
+      "teal": "Бирюзовый",
+      "cyan": "Циан",
+      "sky": "Небесный",
+      "indigo": "Индиго",
+      "violet": "Фиолетовый",
+      "purple": "Пурпурный",
+      "fuchsia": "Фуксия",
+      "stone": "Каменный",
+      "neutral": "Нейтральный",
+      "slate": "Сланцевый",
+      "zinc": "Цинковый"
     }
   }
 }
