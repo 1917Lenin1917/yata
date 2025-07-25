@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { type ColorName, colors } from "@/lib/colors";
 import type { Property, SelectOption } from "@/types/property";
@@ -140,13 +140,13 @@ export function StatusPropertyOptionsDropdown({ status }: Props) {
           ))}
         </DropdownMenuGroup>
         <DropdownMenuGroup>
-          <Button
-            variant={"destructive"}
-            className={"w-full cursor-pointer"}
+          <DropdownMenuItem
+            className={"data-[highlighted]:text-red-400"}
             onClick={onDeleteClick}
           >
+            <Trash2 className={"data-[highlighted]:text-red-400!"} />
             {t("property.status.options.delete")}
-          </Button>
+          </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>

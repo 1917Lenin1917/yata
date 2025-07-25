@@ -19,4 +19,5 @@ export interface GroupByProperty {
   name: string;
   type: string;
   settings: object;
+  showOnCard: boolean;
 }

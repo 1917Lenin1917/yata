@@ -10,7 +10,10 @@ interface Props {
 export function ColorBadge({ colorName, children }: Props) {
   const color = colors[colorName];
   return (
-    <Badge style={{ backgroundColor: color.secondary }}>
+    <Badge
+      style={{ backgroundColor: color.secondary }}
+      className={"text-black"}
+    >
       <div
         style={{ backgroundColor: color.primary }}
         className={"h-4 rounded-full aspect-square"}

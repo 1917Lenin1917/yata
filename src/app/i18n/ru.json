@@ -8,7 +8,12 @@
       "no_description": "",
       "create": "Создать",
       "no_status": "Нет статуса",
-      "add_property": "Добавить свойство"
+      "add_property": "Добавить свойство",
+      "delete_property": "Удалить свойство",
+      "settings": "Настройки свойства",
+      "visibility": "Видимость",
+      "show": "Показывать",
+      "hide": "Скрывать"
     },
     "sidebar": {
       "projects": "Проекты",

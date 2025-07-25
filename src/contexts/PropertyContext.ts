@@ -5,10 +5,14 @@ export const PropertyContext = createContext<{
   property: Property;
   onNameChange(newName: string, propertyId: number): void;
   onValueChange(newValue: string, propertyId: number): void;
+  onVisibilityChange(newValue: boolean, propertyId: number): void;
+  onDelete(propertyId: number): void;
   onUpdate(): void;
 }>({
   property: null as unknown as Property,
   onNameChange() {},
   onValueChange() {},
+  onVisibilityChange() {},
+  onDelete() {},
   onUpdate() {},
 });

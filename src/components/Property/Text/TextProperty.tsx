@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { PropertyContext } from "@/contexts/PropertyContext";
 import { PropertyNameBlock } from "@/components/Property/NameBlock";
+import type { Property } from "@/types/property";
 
 export function TextProperty() {
   const { property, onValueChange } = useContext(PropertyContext);
@@ -25,4 +26,12 @@ export function TextProperty() {
       ></Input>
     </>
   );
+}
+
+interface TextProps {
+  property: Property & { type: "text" };
+}
+
+export function DisplayText({ property }: TextProps) {
+  return <div>{property.value}</div>;
 }

@@ -119,3 +119,25 @@ export const changePropertySettings = async (
     })
     .where(eq(properties.id, propertyId));
 };
+
+export const deleteProperty = async (propertyId: number) => {
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(propertyInstances)
+      .where(eq(propertyInstances.propertyId, propertyId));
+
+    await tx.delete(properties).where(eq(properties.id, propertyId));
+  });
+};
+
+export const changeVisibility = async (
+  propertyId: number,
+  newValue: boolean,
+) => {
+  await db
+    .update(properties)
+    .set({
+      showOnTicketCard: newValue,
+    })
+    .where(eq(properties.id, propertyId));
+};

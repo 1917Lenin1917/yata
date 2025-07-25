@@ -29,7 +29,11 @@ import { ProjectContext } from "@/contexts/ProjectContext";
 import { PROPERTIES } from "@/constants/properties";
 import { DynamicIcon, type IconName } from "lucide-react/dynamic";
 import { useTranslation } from "react-i18next";
-import { createProjectProperty } from "@/services/project";
+import {
+  changeVisibility,
+  createProjectProperty,
+  deleteProperty,
+} from "@/services/project";
 import type { Property } from "@/types/property";
 import { type EditorEvents } from "@tiptap/react";
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
@@ -70,6 +74,10 @@ const onPropertyCreate = async (
   settings: string,
 ) => {
   await createProjectProperty(iconName, propertyType, projectId, settings);
+};
+
+const onVisibilityChange = async (newValue: boolean, propertyId: number) => {
+  await changeVisibility(propertyId, newValue);
 };
 
 export default function TicketModal({
@@ -113,7 +121,7 @@ export default function TicketModal({
         <div className={"min-h-[300px] flex flex-col gap-8"}>
           <Input
             className={
-              "border-none bg-background! ring-0! text-3xl! h-10! p-0! shadow-none!"
+              "border-none bg-background! ring-0! text-3xl! h-10! p-0! px-3! shadow-none!"
             }
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -130,6 +138,12 @@ export default function TicketModal({
                   onValueChange(newValue, propertyId, ticket.id).then(
                     onTicketUpdated,
                   )
+                }
+                onDelete={(propertyId) =>
+                  deleteProperty(propertyId).then(onTicketUpdated)
+                }
+                onVisibilityChange={(newValue, propertyId) =>
+                  onVisibilityChange(newValue, propertyId).then(onTicketUpdated)
                 }
                 onUpdate={onTicketUpdated}
                 key={index}
@@ -169,12 +183,6 @@ export default function TicketModal({
             content={desc ? JSON.parse(desc) : undefined}
             onUpdate={onDescriptionUpdate}
           />
-          {/*<Textarea*/}
-          {/*  className={"bg-background! ring-0! text-xl! min-h-40"}*/}
-          {/*  value={description}*/}
-          {/*  onChange={(e) => setDescription(e.target.value)}*/}
-          {/*  placeholder={t("ticket.no_description")}*/}
-          {/*></Textarea>*/}
         </div>
       </DialogContent>
     </Dialog>

@@ -1,5 +1,8 @@
 import type { Property } from "@/types/property";
-import { TextProperty } from "@/components/Property/Text/TextProperty";
+import {
+  DisplayText,
+  TextProperty,
+} from "@/components/Property/Text/TextProperty";
 import {
   DisplayStatus,
   StatusProperty,
@@ -10,6 +13,8 @@ interface Props {
   property: Property;
   onNameChange(newName: string, propertyId: number): void;
   onValueChange(newValue: string, propertyId: number): void;
+  onVisibilityChange(newValue: boolean, propertyId: number): void;
+  onDelete(propertyId: number): void;
   onUpdate(): void;
 }
 
@@ -27,17 +32,27 @@ export function TicketProperty({
   onNameChange,
   onValueChange,
   onUpdate,
+  onVisibilityChange,
+  onDelete,
 }: Props) {
   const Component = propertyTypeToComponent[property.type];
   return (
-    <PropertyContext.Provider
-      value={{ property, onUpdate, onNameChange, onValueChange }}
+    <PropertyContext
+      value={{
+        property,
+        onUpdate,
+        onNameChange,
+        onValueChange,
+        onVisibilityChange,
+        onDelete,
+      }}
     >
       <Component />
-    </PropertyContext.Provider>
+    </PropertyContext>
   );
 }
 
 export function DisplayProperty({ property }: { property: Property }) {
+  if (property.type === "text") return <DisplayText property={property} />;
   if (property.type === "status") return <DisplayStatus property={property} />;
 }

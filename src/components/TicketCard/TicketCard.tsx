@@ -63,7 +63,7 @@ export default function TicketCard({
             >
               {ticket.title || t("ticket.no_title")}
             </CardTitle>
-            <div className={"flex gap-1 flex-wrap"}>
+            <div className={"flex gap-1 flex-wrap flex-col"}>
               {ticket.properties
                 .filter((p) => p.showOnCard)
                 .map((p) => (

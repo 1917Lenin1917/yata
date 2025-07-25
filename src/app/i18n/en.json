@@ -8,7 +8,12 @@
       "no_description": "",
       "create": "Create a new ticket",
       "no_status": "None",
-      "add_property": "Add property"
+      "add_property": "Add property",
+      "delete_property": "Delete",
+      "settings": "Property settings",
+      "visibility": "Visibility",
+      "show": "Show",
+      "hide": "Hide"
     },
     "sidebar": {
       "projects": "Projects",
