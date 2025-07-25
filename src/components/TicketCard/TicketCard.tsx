@@ -3,8 +3,6 @@
 import { Card, CardAction, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Ticket } from "@/types/ticket";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
-import TicketModal from "@/components/TicketModal";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
@@ -14,6 +12,8 @@ import { useTranslation } from "react-i18next";
 import { DisplayProperty } from "@/components/Property";
 
 interface Props {
+  isOpen?: boolean;
+  setOpenTicket?(id: number): void;
   isActive?: boolean;
   ticket: Ticket;
   hideSource?: boolean;
@@ -22,14 +22,14 @@ interface Props {
 }
 
 export default function TicketCard({
+  isOpen,
+  setOpenTicket = () => {},
   isActive,
   ticket,
   className,
   onTicketUpdated = () => {},
 }: Props) {
   const { t } = useTranslation();
-
-  const [isOpen, setIsOpen] = useState(false);
 
   const handleDeleteTicket = (ticketId: number) => {
     deleteTicket(ticketId).then(onTicketUpdated);
@@ -51,7 +51,7 @@ export default function TicketCard({
         ></div>
       ) : (
         <Card
-          onClick={() => setIsOpen(true)}
+          onClick={() => setOpenTicket(ticket.id)}
           className={cn("py-4 gap-2 w-[300px]", className)}
         >
           <CardHeader>
@@ -83,17 +83,7 @@ export default function TicketCard({
               </Button>
             </CardAction>
           </CardHeader>
-          {/*<CardFooter>{date}</CardFooter>*/}
         </Card>
-      )}
-
-      {isOpen && (
-        <TicketModal
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-          ticket={ticket}
-          onTicketUpdated={onTicketUpdated}
-        ></TicketModal>
       )}
     </div>
   );

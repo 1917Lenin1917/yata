@@ -120,6 +120,21 @@ export const changePropertySettings = async (
     .where(eq(properties.id, propertyId));
 };
 
+export const changeStatusValue = async (
+  propertyId: number,
+  oldValue: string,
+  newValue: string,
+  newSettings: object,
+) => {
+  await changePropertySettings(propertyId, newSettings);
+  await db
+    .update(propertyInstances)
+    .set({
+      value: newValue,
+    })
+    .where(eq(propertyInstances.value, oldValue));
+};
+
 export const deleteProperty = async (propertyId: number) => {
   await db.transaction(async (tx) => {
     await tx

@@ -18,6 +18,8 @@ interface Props {
   activeTicket: Ticket | undefined;
   onTicketUpdated(): void;
   createNewTicket(status: string): void;
+  openTicketId: number | undefined;
+  setOpenTicket(id: number): void;
 }
 
 export default function TicketStack({
@@ -26,6 +28,8 @@ export default function TicketStack({
   activeTicket,
   onTicketUpdated,
   createNewTicket,
+  openTicketId,
+  setOpenTicket,
 }: Props) {
   const { setNodeRef } = useDroppable({
     id: `stack-${status}`,
@@ -51,6 +55,8 @@ export default function TicketStack({
           </div>
           {tickets.map((ticket, idx) => (
             <TicketCard
+              isOpen={openTicketId === ticket.id}
+              setOpenTicket={setOpenTicket}
               isActive={ticket.id === activeTicket?.id}
               className={"cursor-pointer"}
               key={idx}

@@ -9,7 +9,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import TicketStack from "@/components/TicketStack";
 import { useTicketsPage } from "@/hooks/useTicketsPage";
 import type { ProjectWithTickets } from "@/types/project";
@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { createTicket } from "@/services/ticket";
 import { ProjectContext } from "@/contexts/ProjectContext";
 import { Badge } from "@/components/ui/badge";
+import TicketModal from "@/components/TicketModal";
 
 interface Props {
   project: ProjectWithTickets;
@@ -48,6 +49,11 @@ export default function ProjectPage({ project }: Props) {
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+  );
+
+  const [openTicketId, setOpenTicketId] = useState<number>();
+  const openTicket = project.tickets.find(
+    (ticket) => ticket.id === openTicketId,
   );
 
   useEffect(() => {
@@ -76,17 +82,6 @@ export default function ProjectPage({ project }: Props) {
         : undefined,
     }).then(onTicketUpdated);
   };
-
-  const stacks = Object.entries(groupedTickets).map(([value, arr]) => (
-    <TicketStack
-      key={value}
-      createNewTicket={createNewTicket}
-      activeTicket={activeTicket}
-      onTicketUpdated={onTicketUpdated}
-      tickets={arr}
-      status={value}
-    />
-  ));
 
   return (
     <ProjectContext.Provider value={project}>
@@ -142,7 +137,20 @@ export default function ProjectPage({ project }: Props) {
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <div className={"p-8 flex flex-row gap-4 h-full"}>{stacks}</div>
+          <div className={"p-8 flex flex-row gap-4 h-full"}>
+            {Object.entries(groupedTickets).map(([value, arr]) => (
+              <TicketStack
+                openTicketId={openTicketId}
+                setOpenTicket={setOpenTicketId}
+                key={value}
+                createNewTicket={createNewTicket}
+                activeTicket={activeTicket}
+                onTicketUpdated={onTicketUpdated}
+                tickets={arr}
+                status={value}
+              />
+            ))}
+          </div>
 
           <DragOverlay dropAnimation={null}>
             {activeTicket ? (
@@ -151,6 +159,14 @@ export default function ProjectPage({ project }: Props) {
           </DragOverlay>
         </DndContext>
       </div>
+      {openTicket && (
+        <TicketModal
+          ticket={openTicket}
+          isOpen={!!openTicket}
+          setIsOpen={() => setOpenTicketId(undefined)}
+          onTicketUpdated={onTicketUpdated}
+        />
+      )}
     </ProjectContext.Provider>
   );
 }

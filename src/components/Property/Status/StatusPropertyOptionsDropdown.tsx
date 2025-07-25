@@ -11,11 +11,12 @@ import { MoreHorizontal, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { type ColorName, colors } from "@/lib/colors";
 import type { Property, SelectOption } from "@/types/property";
-import { changePropertySettings } from "@/services/project";
+import { changePropertySettings, changeStatusValue } from "@/services/project";
 import { useContext, useEffect, useState } from "react";
 import { PropertyContext } from "@/contexts/PropertyContext";
 import { useTranslation } from "react-i18next";
 import { ColorBadge } from "@/components/ColorBadge";
+import { useDebounce } from "@/hooks/useDebounce";
 
 async function onColorChange(
   propertyId: number,
@@ -46,7 +47,7 @@ async function onValueNameChange(
   const changedProperty = settings.options.findIndex(
     (opt) => opt.value === oldName,
   );
-  await changePropertySettings(propertyId, {
+  await changeStatusValue(propertyId, oldName, newName, {
     ...settings,
     options: [
       ...settings.options.with(changedProperty, {
@@ -79,6 +80,7 @@ export function StatusPropertyOptionsDropdown({ status }: Props) {
   const { t } = useTranslation();
 
   const [statusValue, setStatusValue] = useState<string>(status.value);
+  const statusValueDebounced = useDebounce(statusValue, 500);
 
   useEffect(() => {
     if (statusValue === status.value) return;
@@ -86,10 +88,10 @@ export function StatusPropertyOptionsDropdown({ status }: Props) {
     onValueNameChange(
       property.id,
       status.value,
-      statusValue,
+      statusValueDebounced,
       property.settings,
     ).then(onUpdate);
-  }, [statusValue]);
+  }, [statusValueDebounced]);
 
   const onOpenChange = (open: boolean) => {
     if (!open) return;
