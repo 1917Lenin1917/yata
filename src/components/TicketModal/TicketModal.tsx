@@ -17,14 +17,8 @@ import {
   changeTicketTitle,
 } from "@/services/ticket";
 import { TicketProperty } from "@/components/Property";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { Command, CommandItem } from "@/components/ui/command";
 import { ProjectContext } from "@/contexts/ProjectContext";
 import { PROPERTIES } from "@/constants/properties";
 import { DynamicIcon, type IconName } from "lucide-react/dynamic";
@@ -37,6 +31,12 @@ import {
 import type { Property } from "@/types/property";
 import { type EditorEvents } from "@tiptap/react";
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Props {
   ticket: Ticket;
@@ -150,33 +150,33 @@ export default function TicketModal({
                 property={property}
               />
             ))}
-            <Popover>
-              <PopoverTrigger asChild>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button className={"h-[24px] justify-start"} variant={"ghost"}>
                   <Plus /> {t("ticket.add_property")}
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent className={"w-[160px] p-0"}>
-                <Command>
-                  {PROPERTIES.map((property) => (
-                    <CommandItem
-                      onSelect={() =>
-                        onPropertyCreate(
-                          property.icon,
-                          property.type,
-                          project.id,
-                          property.settings as never,
-                        ).then(onTicketUpdated)
-                      }
-                      key={property.type}
-                    >
-                      <DynamicIcon name={property.icon} />
-                      {t(`property.${property.type}.name`)}
-                    </CommandItem>
-                  ))}
-                </Command>
-              </PopoverContent>
-            </Popover>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className={"w-[var(--radix-dropdown-menu-trigger-width)]"}
+              >
+                {PROPERTIES.map((property) => (
+                  <DropdownMenuItem
+                    onSelect={() =>
+                      onPropertyCreate(
+                        property.icon,
+                        property.type,
+                        project.id,
+                        property.settings as never,
+                      ).then(onTicketUpdated)
+                    }
+                    key={property.type}
+                  >
+                    <DynamicIcon name={property.icon} />
+                    {t(`property.${property.type}.name`)}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <SimpleEditor

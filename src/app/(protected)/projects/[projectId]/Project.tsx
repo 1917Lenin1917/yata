@@ -14,27 +14,15 @@ import TicketStack from "@/components/TicketStack";
 import { useTicketsPage } from "@/hooks/useTicketsPage";
 import type { ProjectWithTickets } from "@/types/project";
 import { Separator } from "@/components/ui/separator";
-import { Check, Funnel, FunnelX } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
-import { useTranslation } from "react-i18next";
-import { cn } from "@/lib/utils";
-import { createTicket } from "@/services/ticket";
 import { ProjectContext } from "@/contexts/ProjectContext";
-import { Badge } from "@/components/ui/badge";
 import TicketModal from "@/components/TicketModal";
+import ProjectFilters from "@/components/ProjectFilters";
 
 interface Props {
   project: ProjectWithTickets;
 }
 
 export default function ProjectPage({ project }: Props) {
-  const { t } = useTranslation();
   const {
     groupBy,
     setGroupBy,
@@ -45,6 +33,7 @@ export default function ProjectPage({ project }: Props) {
     handleDragEnd,
     handleDragOver,
     handleDragStart,
+    createNewTicket,
   } = useTicketsPage();
 
   const sensors = useSensors(
@@ -69,63 +58,16 @@ export default function ProjectPage({ project }: Props) {
     localStorage.setItem("groupBy", `${groupBy.id}`);
   }, [groupBy, project.properties, setGroupBy]);
 
-  const createNewTicket = (status: string) => {
-    createTicket({
-      title: "",
-      desc: "",
-      projectId: project.id,
-      property: groupBy
-        ? {
-            id: groupBy.id,
-            value: status,
-          }
-        : undefined,
-    }).then(onTicketUpdated);
-  };
-
   return (
-    <ProjectContext.Provider value={project}>
+    <ProjectContext value={project}>
       <div className={"w-full flex justify-between"}>
         <div></div>
         <div className={""}>
-          {groupBy && <Badge className={"my-auto"}> {groupBy.name}</Badge>}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant={"ghost"} className={"cursor-pointer"}>
-                {groupBy ? <FunnelX /> : <Funnel />}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className={"p-0"}>
-              <Command>
-                <CommandGroup heading={t("project.group_by")}>
-                  {project.properties
-                    .filter((pr) => pr.type === "status")
-                    .map((property, key) => (
-                      <CommandItem
-                        key={key}
-                        onSelect={() => {
-                          setGroupBy(
-                            groupBy?.id === property.id ? undefined : property,
-                          );
-                          if (groupBy?.id === property.id)
-                            localStorage.removeItem("groupBy");
-                        }}
-                      >
-                        <span>{property.name}</span>
-                        <Check
-                          className={cn(
-                            "ml-auto",
-                            groupBy?.id === property.id
-                              ? "opacity-100"
-                              : "opacity-0",
-                          )}
-                        />
-                      </CommandItem>
-                    ))}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
+          <ProjectFilters
+            project={project}
+            groupBy={groupBy}
+            setGroupBy={setGroupBy}
+          />
         </div>
       </div>
       <Separator />
@@ -143,7 +85,9 @@ export default function ProjectPage({ project }: Props) {
                 openTicketId={openTicketId}
                 setOpenTicket={setOpenTicketId}
                 key={value}
-                createNewTicket={createNewTicket}
+                createNewTicket={(status) =>
+                  createNewTicket(status, project.id)
+                }
                 activeTicket={activeTicket}
                 onTicketUpdated={onTicketUpdated}
                 tickets={arr}
@@ -167,6 +111,6 @@ export default function ProjectPage({ project }: Props) {
           onTicketUpdated={onTicketUpdated}
         />
       )}
-    </ProjectContext.Provider>
+    </ProjectContext>
   );
 }

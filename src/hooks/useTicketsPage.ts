@@ -5,7 +5,7 @@ import type {
   DragOverEvent,
   DragStartEvent,
 } from "@dnd-kit/core";
-import { changeTicketPropertyValue } from "@/services/ticket";
+import { changeTicketPropertyValue, createTicket } from "@/services/ticket";
 import { useRouter } from "next/navigation";
 import type { GroupByProperty } from "@/types/project";
 import type { Property } from "@/types/property";
@@ -213,6 +213,20 @@ export const useTicketsPage = () => {
     }, 0);
   };
 
+  const createNewTicket = (status: string, projectId: number) => {
+    createTicket({
+      title: "",
+      desc: "",
+      projectId: projectId,
+      property: groupBy
+        ? {
+            id: groupBy.id,
+            value: status,
+          }
+        : undefined,
+    }).then(onTicketUpdated);
+  };
+
   return {
     tickets,
     setTickets,
@@ -232,5 +246,7 @@ export const useTicketsPage = () => {
     handleDragStart,
     handleDragOver,
     handleDragEnd,
+
+    createNewTicket,
   };
 };

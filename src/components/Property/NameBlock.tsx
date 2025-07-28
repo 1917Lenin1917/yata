@@ -13,7 +13,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Check, Eye, Settings2, Trash2 } from "lucide-react";
+import { Check, Eye, EyeClosed, Settings2, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 
@@ -75,7 +75,12 @@ export function PropertyNameBlock() {
             </DropdownMenuItem>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger className={"gap-2"}>
-                <Eye className={"w-4 h-4"} /> {t("ticket.visibility")}
+                {property.showOnCard ? (
+                  <Eye className={"w-4 h-4"} />
+                ) : (
+                  <EyeClosed className={"w-4 h-4"} />
+                )}
+                {t("ticket.visibility")}
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent>
                 <DropdownMenuRadioGroup

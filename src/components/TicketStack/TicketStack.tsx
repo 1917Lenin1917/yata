@@ -39,7 +39,7 @@ export default function TicketStack({
   const { t } = useTranslation();
 
   return (
-    <div className={"grow basis-0 shrink-0 min-w-[316px]"}>
+    <div className={"basis-0 shrink-0 min-w-[316px] w-fit"}>
       <SortableContext
         id={`stack-${status}`}
         items={tickets}

@@ -1,9 +1,8 @@
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -117,39 +116,43 @@ export function StatusPropertyOptionsDropdown({ status }: Props) {
   return (
     <DropdownMenu onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
-        <Button variant={"ghost"} className={"p-0 w-fit h-fit"}>
+        <Button variant="ghost" className="p-0 w-fit h-fit">
           <MoreHorizontal />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent side={"right"} onClick={(e) => e.stopPropagation()}>
+
+      <DropdownMenuContent
+        side="right"
+        onClick={(e) => e.stopPropagation()}
+        className="w-60 p-2 max-h-80 flex flex-col"
+      >
         <Input
           value={statusValue}
           onChange={(e) => setStatusValue(e.target.value)}
         />
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>
-            {t("property.status.options.color")}
-          </DropdownMenuLabel>
-          {Object.keys(colors).map((colorName, idx) => (
+
+        <div className="max-h-48 overflow-y-auto overscroll-contain mt-2">
+          {Object.keys(colors).map((colorName) => (
             <DropdownMenuItem
-              key={idx}
-              onSelect={(event) => onSelect(event, colorName as ColorName)}
+              key={colorName}
+              onSelect={(evt) => onSelect(evt, colorName as ColorName)}
             >
               <ColorBadge colorName={colorName as ColorName}>
                 {t(`color.${colorName}`)}
               </ColorBadge>
             </DropdownMenuItem>
           ))}
-        </DropdownMenuGroup>
-        <DropdownMenuGroup>
-          <DropdownMenuItem
-            className={"data-[highlighted]:text-red-400"}
-            onClick={onDeleteClick}
-          >
-            <Trash2 className={"data-[highlighted]:text-red-400!"} />
-            {t("property.status.options.delete")}
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
+        </div>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem
+          className="data-[highlighted]:text-red-400"
+          onClick={onDeleteClick}
+        >
+          <Trash2 className="data-[highlighted]:text-red-400!" />
+          {t("property.status.options.delete")}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
