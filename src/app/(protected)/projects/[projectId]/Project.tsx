@@ -11,7 +11,7 @@ import {
 } from "@dnd-kit/core";
 import { useEffect, useState } from "react";
 import TicketStack from "@/components/TicketStack";
-import { useTicketsPage } from "@/hooks/useTicketsPage";
+import { useProjectsPage } from "@/hooks/useProjectsPage";
 import type { ProjectWithTickets } from "@/types/project";
 import { Separator } from "@/components/ui/separator";
 import { ProjectContext } from "@/contexts/ProjectContext";
@@ -34,7 +34,7 @@ export default function ProjectPage({ project }: Props) {
     handleDragOver,
     handleDragStart,
     createNewTicket,
-  } = useTicketsPage();
+  } = useProjectsPage();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),

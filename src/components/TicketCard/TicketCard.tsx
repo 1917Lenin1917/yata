@@ -52,7 +52,7 @@ export default function TicketCard({
       ) : (
         <Card
           onClick={() => setOpenTicket(ticket.id)}
-          className={cn("py-4 gap-2 w-[300px]", className)}
+          className={cn("py-4 gap-2 w-full", className)}
         >
           <CardHeader>
             <CardTitle

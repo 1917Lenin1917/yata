@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import type { GroupByProperty } from "@/types/project";
 import type { Property } from "@/types/property";
 
-export const useTicketsPage = () => {
+export const useProjectsPage = () => {
   const router = useRouter();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [activeTicket, setActiveTicket] = useState<Ticket>();

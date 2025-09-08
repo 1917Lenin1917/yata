@@ -76,5 +76,6 @@ export const mapDtoToProjectWithTickets = (
     name: property.name || "",
     type: property.type ?? "text",
     settings: property.settings as never,
+    showOnCard: property.showOnTicketCard || false,
   })),
 });
