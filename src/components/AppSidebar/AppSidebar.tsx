@@ -16,6 +16,8 @@ import { getCurrentUserProjects } from "@/services/project";
 import LogOutButton from "@/components/AppSidebar/LogOutButton";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import LangSwitcher from "@/components/LangSwitcher";
+import Link from "next/link";
+import { IMAGES_URL } from "@/constants/images";
 
 export default async function AppSidebar() {
   const user = await getCurrentUser();
@@ -24,8 +26,11 @@ export default async function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <SidebarMenuButton className="h-fit font-semibold text-sm">
-          <div>Placeholder App Name</div>
+        <SidebarMenuButton className="h-fit flex-col items-start gap-0">
+          <div className={"font-semibold text-sm"}>YATA</div>
+          <div className={"font-medium text-xs text-muted-foreground"}>
+            Yet Another Todo App
+          </div>
         </SidebarMenuButton>
       </SidebarHeader>
       <SidebarContent>
@@ -39,15 +44,19 @@ export default async function AppSidebar() {
               <ThemeSwitcher />
             </SidebarMenuItem>
             <SidebarMenuItem className="flex justify-between">
-              <Avatar>
-                <AvatarImage src={"https://cataas.com/cat"} />
-                <AvatarFallback delayMs={500}>
-                  {user ? getInitials(user) : null}
-                </AvatarFallback>
-              </Avatar>
-              <div className="text-sm font-semibold text-center h-fit self-center">
-                {user ? formatUser(user) : null}
-              </div>
+              <SidebarMenuButton asChild>
+                <Link href={"/settings"}>
+                  <Avatar>
+                    <AvatarImage src={`${IMAGES_URL}/${user?.avatar}`} />
+                    <AvatarFallback delayMs={500}>
+                      {user ? getInitials(user) : null}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="text-sm font-semibold text-center h-fit self-center">
+                    {user ? formatUser(user) : null}
+                  </div>
+                </Link>
+              </SidebarMenuButton>
 
               <LogOutButton />
             </SidebarMenuItem>

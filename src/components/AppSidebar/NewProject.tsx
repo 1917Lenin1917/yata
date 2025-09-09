@@ -20,6 +20,7 @@ export default function NewProject() {
         emoji: "",
         description: "",
       });
+      setShowInput(false);
 
       router.refresh();
     }

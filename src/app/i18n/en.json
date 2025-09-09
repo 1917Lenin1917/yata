@@ -1,5 +1,18 @@
 {
   "common": {
+    "settings": {
+      "title": "Settings",
+      "photo": {
+        "title": "Photo",
+        "subtitle": "Choose profile photo.",
+        "upload": "Upload"
+      },
+      "fullname": {
+        "title": "Full Name",
+        "subtitle": "Name, that will be seen by other users."
+      },
+      "save": "Save"
+    },
     "project": {
       "group_by": "Group by"
     },

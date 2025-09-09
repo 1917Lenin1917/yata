@@ -62,6 +62,18 @@ interface CreateNewProjectPayload {
   emoji: string;
 }
 
+export const updateProjectEmoji = async (
+  projectId: number,
+  newEmoji: string,
+) => {
+  await db
+    .update(projects)
+    .set({
+      emoji: newEmoji,
+    })
+    .where(eq(projects.id, projectId));
+};
+
 export const createNewProject = async (payload: CreateNewProjectPayload) => {
   const author = await getCurrentUser();
 

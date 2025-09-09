@@ -17,12 +17,17 @@ import { Separator } from "@/components/ui/separator";
 import { ProjectContext } from "@/contexts/ProjectContext";
 import TicketModal from "@/components/TicketModal";
 import ProjectFilters from "@/components/ProjectFilters";
+import DisplaySelectEmoji from "@/components/DisplaySelectEmoji";
+import { updateProjectEmoji } from "@/services/project";
+import { useRouter } from "next/navigation";
 
 interface Props {
   project: ProjectWithTickets;
 }
 
 export default function ProjectPage({ project }: Props) {
+  const router = useRouter();
+
   const {
     groupBy,
     setGroupBy,
@@ -58,8 +63,39 @@ export default function ProjectPage({ project }: Props) {
     localStorage.setItem("groupBy", `${groupBy.id}`);
   }, [groupBy, project.properties, setGroupBy]);
 
+  const ticketStacks = Object.entries(groupedTickets).map(([value, arr]) => (
+    <TicketStack
+      openTicketId={openTicketId}
+      setOpenTicket={setOpenTicketId}
+      key={value}
+      createNewTicket={(status) => createNewTicket(status, project.id)}
+      activeTicket={activeTicket}
+      onTicketUpdated={onTicketUpdated}
+      tickets={arr}
+      status={value}
+    />
+  ));
+
+  const handleUpdateEmoji = async (newEmoji: string) => {
+    await updateProjectEmoji(
+      project.id,
+      project.emoji === newEmoji ? "" : newEmoji,
+    );
+    router.refresh();
+  };
+
   return (
     <ProjectContext value={project}>
+      <div className={"px-16 text-4xl relative flex"}>
+        <DisplaySelectEmoji
+          className={"absolute left-[20px]"}
+          currentEmoji={project.emoji}
+          handleUpdateEmoji={handleUpdateEmoji}
+        />
+        {project.name}
+      </div>
+      <div className={"px-16 py-2 text-xl"}>{project.description}</div>
+
       <div className={"w-full flex justify-between"}>
         <div></div>
         <div className={""}>
@@ -79,22 +115,7 @@ export default function ProjectPage({ project }: Props) {
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <div className={"p-8 flex flex-row gap-4 h-full"}>
-            {Object.entries(groupedTickets).map(([value, arr]) => (
-              <TicketStack
-                openTicketId={openTicketId}
-                setOpenTicket={setOpenTicketId}
-                key={value}
-                createNewTicket={(status) =>
-                  createNewTicket(status, project.id)
-                }
-                activeTicket={activeTicket}
-                onTicketUpdated={onTicketUpdated}
-                tickets={arr}
-                status={value}
-              />
-            ))}
-          </div>
+          <div className={"p-8 flex flex-row gap-4 h-full"}>{ticketStacks}</div>
 
           <DragOverlay dropAnimation={null}>
             {activeTicket ? (

@@ -10,6 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { ComponentProps } from "react";
+import Link from "next/link";
 
 interface Props extends ComponentProps<"div"> {
   credentialsAction(formData: FormData): void;
@@ -58,9 +59,12 @@ export function LoginForm({ className, credentialsAction, ...props }: Props) {
             </div>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}
-              <a href="#" className="underline underline-offset-4">
+              <Link
+                href="/auth/sign-up"
+                className="underline underline-offset-4"
+              >
                 Sign up
-              </a>
+              </Link>
             </div>
           </form>
         </CardContent>

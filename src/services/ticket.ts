@@ -62,22 +62,19 @@ export const createTicket = async (body: CreateTicket) => {
   //   orderBy: (tickets, { desc }) => [desc(tickets.id)],
   // });
 
-  const ticket = (
-    await db
-      .insert(tickets)
-      .values({
-        title: body.title,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        authorId: author.id,
-        description: body.desc,
-        projectId: body.projectId,
-        // priority: (highestPrio?.priority ?? 0) + 1,
-        priority: 0,
-      })
-      .returning()
-  )[0];
-
+  const [ticket] = await db
+    .insert(tickets)
+    .values({
+      title: body.title,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      authorId: author.id,
+      description: body.desc,
+      projectId: body.projectId,
+      // priority: (highestPrio?.priority ?? 0) + 1,
+      priority: 0,
+    })
+    .returning();
   const projectProperties = await db.query.properties.findMany({
     where: eq(properties.projectId, body.projectId),
   });

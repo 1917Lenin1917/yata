@@ -44,6 +44,7 @@ export const mapDtoToTicket = (
 export const mapDtoToUser = (dto: DtoUser): User => ({
   id: dto.id,
   email: dto.email || "",
+  avatar: dto.avatarFilename || "",
   firstName: dto.firstName || "",
   lastName: dto.lastName || "",
 });

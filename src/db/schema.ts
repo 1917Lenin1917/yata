@@ -22,6 +22,7 @@ export const users = sqliteTable("users", {
   firstName: text(),
   lastName: text(),
   email: text(),
+  avatarFilename: text(),
   password: text(),
 });
 

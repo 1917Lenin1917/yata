@@ -6,6 +6,7 @@ import { AuthProvider } from "../components/Providers";
 import { getCurrentUser } from "@/services/user";
 
 import "./globals.css";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -30,7 +31,10 @@ export default async function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <LocaleProvider>{children}</LocaleProvider>
+              <LocaleProvider>
+                {children}
+                <Toaster richColors />
+              </LocaleProvider>
             </ThemeProvider>
           </AuthProvider>
         </SessionProvider>
