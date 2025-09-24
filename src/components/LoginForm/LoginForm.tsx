@@ -36,6 +36,7 @@ export function LoginForm({ className, credentialsAction, ...props }: Props) {
                   name="email"
                   type="email"
                   placeholder="m@example.com"
+                  autoComplete={"email"}
                   required
                 />
               </div>
@@ -49,7 +50,13 @@ export function LoginForm({ className, credentialsAction, ...props }: Props) {
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" name="password" type="password" required />
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete={"current-password"}
+                  required
+                />
               </div>
               <div className="flex flex-col gap-3">
                 <Button type="submit" className="w-full">

@@ -1,19 +1,28 @@
 "use server";
 
 import { db } from "@/db/drizzle";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { users } from "@/db/schema";
 import { auth } from "@/auth";
 import { mapDtoToUser } from "@/services/mappers";
 import * as fs from "node:fs";
 import { NGINX_FILES_PATH } from "@/constants/images";
+import type { User } from "@/types/user";
+import { checkPassword, hashPassword } from "@/lib/password";
 
-export const getUser = async (email: string, password: string) => {
+export const getUser = async (
+  email: string,
+  password: string,
+): Promise<User | null> => {
   const user = await db.query.users.findFirst({
-    where: and(eq(users.email, email), eq(users.password, password)),
+    where: eq(users.email, email),
   });
 
-  return user ? mapDtoToUser(user) : null;
+  if (!user) return null;
+
+  const samePassword = await checkPassword(password, user.password);
+
+  return samePassword ? mapDtoToUser(user) : null;
 };
 
 export async function getCurrentUser() {
@@ -27,19 +36,22 @@ export async function getCurrentUser() {
   return data ? mapDtoToUser(data) : null;
 }
 
-export async function createUser(
-  firstName: string,
-  lastName: string,
-  email: string,
-  password: string,
-) {
+type CreateUserPayload = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+};
+export const createUser = async (payload: CreateUserPayload): Promise<void> => {
+  const hashedPassword = await hashPassword(payload.password);
+
   await db.insert(users).values({
-    firstName,
-    lastName,
-    email,
-    password,
+    email: payload.email,
+    firstName: payload.firstName,
+    lastName: payload.lastName,
+    password: hashedPassword,
   });
-}
+};
 
 export async function updateUserName(
   userId: number,

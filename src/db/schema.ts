@@ -21,9 +21,9 @@ export const users = sqliteTable("users", {
   id: integer().primaryKey({ autoIncrement: true }),
   firstName: text(),
   lastName: text(),
-  email: text(),
+  email: text().notNull(),
   avatarFilename: text(),
-  password: text(),
+  password: text().notNull(),
 });
 
 export const properties = sqliteTable("properties", {

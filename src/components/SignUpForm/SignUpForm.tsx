@@ -26,6 +26,7 @@ export default function SignUpForm({ credentialsAction }: Props) {
                 name="email"
                 type="email"
                 placeholder="m@example.com"
+                autoComplete={"email"}
                 required
               />
             </div>
@@ -36,13 +37,20 @@ export default function SignUpForm({ credentialsAction }: Props) {
                 id="fullname"
                 name="fullname"
                 placeholder="John Doe"
+                autoComplete={"name"}
                 required
               />
             </div>
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" required />
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete={"new-password"}
+                required
+              />
             </div>
           </div>
           <Button type="submit" className="w-full mt-4">
