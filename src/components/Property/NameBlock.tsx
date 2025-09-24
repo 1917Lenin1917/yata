@@ -29,6 +29,10 @@ export function PropertyNameBlock() {
   const onDeleteClick = () => {
     onDelete(property.id);
   };
+  const handleChangeName = () => {
+    onNameChange(name, property.id);
+    setShowSettings(false);
+  };
 
   return (
     <div className={"flex gap-1"}>
@@ -51,10 +55,7 @@ export function PropertyNameBlock() {
           >
             <div className={"flex gap-2"}>
               <Input value={name} onChange={(e) => setName(e.target.value)} />
-              <Button
-                onClick={() => onNameChange(name, property.id)}
-                variant={"outline"}
-              >
+              <Button onClick={handleChangeName} variant={"outline"}>
                 <Check />
               </Button>
             </div>

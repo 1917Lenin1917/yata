@@ -114,23 +114,24 @@ export default function TicketModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className={"lg:max-w-[840px] px-8"}>
+      <DialogContent className="lg:max-w-[840px] px-8 flex flex-col max-h-[80vh]">
         <DialogHeader>
           <DialogTitle></DialogTitle>
         </DialogHeader>
-        <div className={"min-h-[300px] flex flex-col gap-8"}>
+
+        <div className="flex flex-col gap-8 flex-1 min-h-0">
           <Input
-            className={
-              "border-none bg-background! ring-0! text-3xl! h-10! p-0! px-3! shadow-none!"
-            }
+            className="border-none bg-background! ring-0! text-3xl! h-10! p-0! px-3! shadow-none! w-full"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t("ticket.no_title")}
-          ></Input>
+          />
 
-          <div className={"grid grid-cols-[200px_1fr] gap-1"}>
+          <div className="grid grid-cols-[200px_1fr] gap-1 min-w-0">
             {ticket.properties.map((property, index) => (
               <TicketProperty
+                key={index}
+                property={property}
                 onNameChange={(newName, propertyId) =>
                   onNameChange(newName, propertyId).then(onTicketUpdated)
                 }
@@ -146,21 +147,19 @@ export default function TicketModal({
                   onVisibilityChange(newValue, propertyId).then(onTicketUpdated)
                 }
                 onUpdate={onTicketUpdated}
-                key={index}
-                property={property}
               />
             ))}
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button className={"h-[24px] justify-start"} variant={"ghost"}>
+                <Button className="h-[24px] justify-start" variant="ghost">
                   <Plus /> {t("ticket.add_property")}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className={"w-[var(--radix-dropdown-menu-trigger-width)]"}
-              >
+              <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
                 {PROPERTIES.map((property) => (
                   <DropdownMenuItem
+                    key={property.type}
                     onSelect={() =>
                       onPropertyCreate(
                         property.icon,
@@ -169,7 +168,6 @@ export default function TicketModal({
                         property.settings as never,
                       ).then(onTicketUpdated)
                     }
-                    key={property.type}
                   >
                     <DynamicIcon name={property.icon} />
                     {t(`property.${property.type}.name`)}

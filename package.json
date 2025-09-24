@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "build:turbo": "rm -f ./node_modules/@libsql/hrana-client/LICENSE && next build --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
