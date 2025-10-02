@@ -17,7 +17,12 @@ export default function SignUpPage() {
       const email = formData.get("email") as string;
       const password = formData.get("password") as string;
 
-      await createUser(firstName ?? " ", lastName ?? " ", email, password);
+      await createUser({
+        firstName: firstName ?? "",
+        lastName: lastName ?? "",
+        email,
+        password,
+      });
 
       const response = await signIn("credentials", {
         redirect: false,
