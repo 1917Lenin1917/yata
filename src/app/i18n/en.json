@@ -14,7 +14,8 @@
       "save": "Save"
     },
     "project": {
-      "group_by": "Group by"
+      "group_by": "Group by",
+      "empty": "New project"
     },
     "ticket": {
       "no_title": "No title",

@@ -2,47 +2,27 @@
 
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { Plus } from "lucide-react";
-import { useState, type KeyboardEvent } from "react";
-import { Input } from "@/components/ui/input";
 import { createNewProject } from "@/services/project";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 export default function NewProject() {
-  const { t } = useTranslation();
-  const [showInput, setShowInput] = useState<boolean>(false);
   const router = useRouter();
+  const { t } = useTranslation();
 
-  async function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === "Enter") {
-      await createNewProject({
-        name: event.currentTarget.value,
-        emoji: "",
-        description: "",
-      });
-      setShowInput(false);
-
-      router.refresh();
-    }
-  }
-
-  if (showInput)
-    return (
-      <SidebarMenuItem>
-        <SidebarMenuButton asChild>
-          <Input
-            autoFocus
-            onBlur={() => setShowInput(false)}
-            onKeyDown={handleKeyDown}
-          />
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-    );
+  const onCreateProjectClick = async () => {
+    await createNewProject({
+      name: "",
+      emoji: "",
+      description: "",
+    });
+    router.refresh();
+  };
 
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        onClick={() => setShowInput(true)}
+        onClick={onCreateProjectClick}
         className={"cursor-pointer"}
       >
         <Plus /> {t("sidebar.create_project")}

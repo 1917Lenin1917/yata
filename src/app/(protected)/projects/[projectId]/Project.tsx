@@ -1,80 +1,23 @@
 "use client";
 
-import TicketCard from "@/components/TicketCard";
-import {
-  closestCorners,
-  DndContext,
-  DragOverlay,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import { useEffect, useState } from "react";
-import TicketStack from "@/components/TicketStack";
-import { useProjectsPage } from "@/hooks/useProjectsPage";
+import { useState } from "react";
 import type { ProjectWithTickets } from "@/types/project";
 import { Separator } from "@/components/ui/separator";
 import { ProjectContext } from "@/contexts/ProjectContext";
-import TicketModal from "@/components/TicketModal";
-import ProjectFilters from "@/components/ProjectFilters";
 import DisplaySelectEmoji from "@/components/DisplaySelectEmoji";
 import { updateProjectEmoji } from "@/services/project";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
+import { StarIcon } from "lucide-react";
 
 interface Props {
   project: ProjectWithTickets;
 }
 
 export default function ProjectPage({ project }: Props) {
+  const [isStarred, setIsStarred] = useState(false);
+  const { t } = useTranslation();
   const router = useRouter();
-
-  const {
-    groupBy,
-    setGroupBy,
-    setTickets,
-    activeTicket,
-    groupedTickets,
-    onTicketUpdated,
-    handleDragEnd,
-    handleDragOver,
-    handleDragStart,
-    createNewTicket,
-  } = useProjectsPage();
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-  );
-
-  const [openTicketId, setOpenTicketId] = useState<number>();
-  const openTicket = project.tickets.find(
-    (ticket) => ticket.id === openTicketId,
-  );
-
-  useEffect(() => {
-    setTickets(project.tickets);
-  }, [project, setTickets]);
-
-  useEffect(() => {
-    if (!groupBy) {
-      const localId = Number(localStorage.getItem("groupBy")) || undefined;
-      setGroupBy(project.properties.find((pr) => pr.id === localId));
-      return;
-    }
-    localStorage.setItem("groupBy", `${groupBy.id}`);
-  }, [groupBy, project.properties, setGroupBy]);
-
-  const ticketStacks = Object.entries(groupedTickets).map(([value, arr]) => (
-    <TicketStack
-      openTicketId={openTicketId}
-      setOpenTicket={setOpenTicketId}
-      key={value}
-      createNewTicket={(status) => createNewTicket(status, project.id)}
-      activeTicket={activeTicket}
-      onTicketUpdated={onTicketUpdated}
-      tickets={arr}
-      status={value}
-    />
-  ));
 
   const handleUpdateEmoji = async (newEmoji: string) => {
     await updateProjectEmoji(
@@ -86,52 +29,28 @@ export default function ProjectPage({ project }: Props) {
 
   return (
     <ProjectContext value={project}>
-      <div className={"px-16 text-4xl relative flex"}>
+      <div className={"px-16 text-4xl relative flex justify-between"}>
         <DisplaySelectEmoji
           className={"absolute left-[20px]"}
           currentEmoji={project.emoji}
           handleUpdateEmoji={handleUpdateEmoji}
         />
-        {project.name}
+        <span>{project.name || t("project.empty")}</span>
+        {isStarred && (
+          <StarIcon
+            onClick={() => setIsStarred(false)}
+            fill={"yellow"}
+            strokeWidth={0}
+            className={"size-10"}
+          />
+        )}
+        {!isStarred && (
+          <StarIcon onClick={() => setIsStarred(true)} className={"size-10"} />
+        )}
       </div>
       <div className={"px-16 py-2 text-xl"}>{project.description}</div>
 
-      <div className={"w-full flex justify-between"}>
-        <div></div>
-        <div className={""}>
-          <ProjectFilters
-            project={project}
-            groupBy={groupBy}
-            setGroupBy={setGroupBy}
-          />
-        </div>
-      </div>
       <Separator />
-      <div className={"overflow-x-auto"}>
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCorners}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-        >
-          <div className={"p-8 flex flex-row gap-4 h-full"}>{ticketStacks}</div>
-
-          <DragOverlay dropAnimation={null}>
-            {activeTicket ? (
-              <TicketCard ticket={activeTicket}></TicketCard>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
-      </div>
-      {openTicket && (
-        <TicketModal
-          ticket={openTicket}
-          isOpen={!!openTicket}
-          setIsOpen={() => setOpenTicketId(undefined)}
-          onTicketUpdated={onTicketUpdated}
-        />
-      )}
     </ProjectContext>
   );
 }
