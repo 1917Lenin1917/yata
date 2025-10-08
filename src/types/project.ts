@@ -8,6 +8,7 @@ export interface Project {
   name: string;
   description: string;
   properties: GroupByProperty[];
+  isFavorite: boolean;
 }
 
 export interface ProjectWithTickets extends Project {

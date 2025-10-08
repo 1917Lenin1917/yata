@@ -2,12 +2,13 @@
 
 import { db } from "@/db/drizzle";
 import { getCurrentUser } from "@/services/user";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import {
   projects,
   properties,
   propertyInstances,
   tickets,
+  userFavoriteProjects,
   users,
 } from "@/db/schema";
 import {
@@ -15,6 +16,38 @@ import {
   mapDtoToProjectWithTickets,
 } from "@/services/mappers";
 import type { Property } from "@/types/property";
+
+export const getCurrentUserFavoriteProjects = async () => {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
+  const data = await db.query.userFavoriteProjects.findMany({
+    where: eq(userFavoriteProjects.userId, user.id),
+    with: {
+      project: {
+        with: {
+          pages: {
+            with: {
+              author: true,
+            },
+          },
+          userFavoriteProjects: {
+            where: eq(userFavoriteProjects.userId, user.id),
+          },
+        },
+      },
+    },
+  });
+
+  return (
+    data?.map((fav) =>
+      mapDtoToProjectWithPages({
+        ...fav.project,
+        isFavorite: fav.project.userFavoriteProjects.length > 0,
+      }),
+    ) || []
+  );
+};
 
 export const getCurrentUserProjects = async () => {
   const user = await getCurrentUser();
@@ -30,15 +63,28 @@ export const getCurrentUserProjects = async () => {
               author: true,
             },
           },
+          userFavoriteProjects: {
+            where: eq(userFavoriteProjects.userId, user.id),
+          },
         },
       },
     },
   });
 
-  return data?.projects?.map(mapDtoToProjectWithPages) || [];
+  return (
+    data?.projects?.map((project) =>
+      mapDtoToProjectWithPages({
+        ...project,
+        isFavorite: project.userFavoriteProjects.length > 0,
+      }),
+    ) || []
+  );
 };
 
 export const getProjectWithTickets = async (projectId: number) => {
+  const author = await getCurrentUser();
+  if (!author) return;
+
   try {
     const data = await db.query.projects.findFirst({
       with: {
@@ -53,37 +99,48 @@ export const getProjectWithTickets = async (projectId: number) => {
             },
           },
         },
-      },
-      where: eq(projects.id, projectId),
-    });
-
-    return data ? mapDtoToProjectWithTickets(data) : null;
-  } catch (e) {
-    console.error(e);
-    return null;
-  }
-};
-
-export const getProjectWithPages = async (projectId: number) => {
-  try {
-    const data = await db.query.projects.findFirst({
-      with: {
-        properties: true,
-        pages: {
-          with: {
-            author: true,
-          },
+        userFavoriteProjects: {
+          where: eq(userFavoriteProjects.userId, author.id),
         },
       },
       where: eq(projects.id, projectId),
     });
 
-    return data ? mapDtoToProjectWithPages(data) : null;
+    return data
+      ? mapDtoToProjectWithTickets({
+          ...data,
+          isFavorite: data.userFavoriteProjects.length > 0,
+        })
+      : null;
   } catch (e) {
     console.error(e);
     return null;
   }
 };
+
+// export const getProjectWithPages = async (projectId: number) => {
+//   try {
+//     const data = await db.query.projects.findFirst({
+//       with: {
+//         properties: true,
+//         pages: {
+//           with: {
+//             author: true,
+//           },
+//         },
+//         userFavoriteProjects: {
+//           where: eq(userFavoriteProjects.userId, currentUs.id),
+//         },
+//       },
+//       where: eq(projects.id, projectId),
+//     });
+//
+//     return data ? mapDtoToProjectWithPages(data) : null;
+//   } catch (e) {
+//     console.error(e);
+//     return null;
+//   }
+// };
 
 interface CreateNewProjectPayload {
   name: string;
@@ -196,4 +253,28 @@ export const changeVisibility = async (
       showOnTicketCard: newValue,
     })
     .where(eq(properties.id, propertyId));
+};
+
+export const favoriteProject = async (projectId: number) => {
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  await db.insert(userFavoriteProjects).values({
+    userId: user.id,
+    projectId: projectId,
+  });
+};
+
+export const unfavoriteProject = async (projectId: number) => {
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  await db
+    .delete(userFavoriteProjects)
+    .where(
+      and(
+        eq(userFavoriteProjects.userId, user.id),
+        eq(userFavoriteProjects.projectId, projectId),
+      ),
+    );
 };

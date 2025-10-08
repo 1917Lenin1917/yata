@@ -33,6 +33,7 @@
       "hide": "Hide"
     },
     "sidebar": {
+      "favorites": "Favorites",
       "projects": "Projects",
       "create_project": "Create a new project"
     },

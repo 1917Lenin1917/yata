@@ -61,6 +61,16 @@ export const projects = sqliteTable("projects", {
     .notNull(),
 });
 
+export const userFavoriteProjects = sqliteTable("userFavoriteProjects", {
+  userId: integer()
+    .references(() => users.id)
+    .notNull(),
+
+  projectId: integer()
+    .references(() => projects.id)
+    .notNull(),
+});
+
 export const pages = sqliteTable("pages", {
   id: integer().primaryKey({ autoIncrement: true }),
   name: text().notNull(),
@@ -93,6 +103,7 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
     references: [users.id],
   }),
   properties: many(properties),
+  userFavoriteProjects: many(userFavoriteProjects),
 }));
 
 export const pagesRelations = relations(pages, ({ one }) => ({
@@ -139,3 +150,17 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
     references: [projects.id],
   }),
 }));
+
+export const userFavoriteProjectsRelations = relations(
+  userFavoriteProjects,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [userFavoriteProjects.userId],
+      references: [users.id],
+    }),
+    project: one(projects, {
+      fields: [userFavoriteProjects.projectId],
+      references: [projects.id],
+    }),
+  }),
+);

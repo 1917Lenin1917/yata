@@ -20,7 +20,7 @@ import type { Page, PageWithContent } from "@/types/page";
 type DtoTicket = InferSelectModel<typeof tickets>;
 type DtoPage = InferSelectModel<typeof pages>;
 type DtoUser = InferSelectModel<typeof users>;
-type DtoProject = InferSelectModel<typeof projects>;
+type DtoProject = InferSelectModel<typeof projects> & { isFavorite: boolean };
 type DtoPropertyInstance = InferSelectModel<typeof propertyInstances>;
 type DtoProperty = InferSelectModel<typeof properties>;
 
@@ -62,6 +62,7 @@ export const mapDtoToProject = (dto: DtoProject): Project => ({
   description: dto.description,
   emoji: dto.emoji,
   properties: [],
+  isFavorite: dto.isFavorite,
 });
 
 export const mapDtoToProjectWithTickets = (
@@ -75,6 +76,7 @@ export const mapDtoToProjectWithTickets = (
 ): ProjectWithTickets => ({
   id: dto.id,
   name: dto.name,
+  isFavorite: dto.isFavorite,
   description: dto.description,
   emoji: dto.emoji,
   tickets: dto.tickets.map(mapDtoToTicket),
@@ -96,6 +98,7 @@ export const mapDtoToProjectWithPages = (
   },
 ): ProjectWithPages => ({
   id: dto.id,
+  isFavorite: dto.isFavorite,
   name: dto.name,
   description: dto.description,
   emoji: dto.emoji,

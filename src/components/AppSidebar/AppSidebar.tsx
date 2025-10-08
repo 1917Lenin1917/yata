@@ -12,7 +12,10 @@ import { formatUser, getInitials } from "@/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ProjectsNav from "@/components/AppSidebar/ProjectsNav";
 import { getCurrentUser } from "@/services/user";
-import { getCurrentUserProjects } from "@/services/project";
+import {
+  getCurrentUserFavoriteProjects,
+  getCurrentUserProjects,
+} from "@/services/project";
 import LogOutButton from "@/components/AppSidebar/LogOutButton";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import LangSwitcher from "@/components/LangSwitcher";
@@ -21,6 +24,7 @@ import { IMAGES_URL } from "@/constants/images";
 
 export default async function AppSidebar() {
   const user = await getCurrentUser();
+  const favorites = await getCurrentUserFavoriteProjects();
   const projects = await getCurrentUserProjects();
 
   return (
@@ -34,7 +38,14 @@ export default async function AppSidebar() {
         </SidebarMenuButton>
       </SidebarHeader>
       <SidebarContent>
-        <ProjectsNav projects={projects} />
+        {!!favorites.length && (
+          <ProjectsNav groupLabel={"sidebar.favorites"} projects={favorites} />
+        )}
+        <ProjectsNav
+          groupLabel={"sidebar.projects"}
+          projects={projects}
+          showCreateNewProject
+        />
       </SidebarContent>
       <SidebarFooter>
         <SidebarGroup>

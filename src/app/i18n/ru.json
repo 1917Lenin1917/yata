@@ -33,6 +33,7 @@
       "hide": "Скрывать"
     },
     "sidebar": {
+      "favorites": "Избранные",
       "projects": "Проекты",
       "create_project": "Создать новый проект"
     },
