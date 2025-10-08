@@ -17,6 +17,9 @@
       "group_by": "Group by",
       "empty": "New project"
     },
+    "page": {
+      "empty": "New page"
+    },
     "ticket": {
       "no_title": "No title",
       "no_description": "",

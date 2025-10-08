@@ -61,6 +61,25 @@ export const projects = sqliteTable("projects", {
     .notNull(),
 });
 
+export const pages = sqliteTable("pages", {
+  id: integer().primaryKey({ autoIncrement: true }),
+  name: text().notNull(),
+  description: text().notNull(),
+  text: text().default("").notNull(),
+  emoji: text().default("").notNull(),
+
+  createdAt: text(),
+  updatedAt: text(),
+  deletedAt: text(),
+
+  projectId: integer()
+    .references(() => projects.id)
+    .notNull(),
+  authorId: integer()
+    .references(() => users.id)
+    .notNull(),
+});
+
 export const usersRelations = relations(users, ({ many }) => ({
   tickets: many(tickets),
   projects: many(projects),
@@ -68,11 +87,23 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
   tickets: many(tickets),
+  pages: many(pages),
   author: one(users, {
     fields: [projects.authorId],
     references: [users.id],
   }),
   properties: many(properties),
+}));
+
+export const pagesRelations = relations(pages, ({ one }) => ({
+  project: one(projects, {
+    fields: [pages.projectId],
+    references: [projects.id],
+  }),
+  author: one(users, {
+    fields: [pages.authorId],
+    references: [users.id],
+  }),
 }));
 
 export const ticketsRelations = relations(tickets, ({ one, many }) => ({

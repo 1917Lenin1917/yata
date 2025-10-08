@@ -17,6 +17,9 @@
       "group_by": "Группировать",
       "empty": "Новый проект"
     },
+    "page": {
+      "empty": "Новая страница"
+    },
     "ticket": {
       "no_title": "Без названия",
       "no_description": "",

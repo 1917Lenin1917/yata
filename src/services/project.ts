@@ -11,7 +11,7 @@ import {
   users,
 } from "@/db/schema";
 import {
-  mapDtoToProject,
+  mapDtoToProjectWithPages,
   mapDtoToProjectWithTickets,
 } from "@/services/mappers";
 import type { Property } from "@/types/property";
@@ -23,11 +23,19 @@ export const getCurrentUserProjects = async () => {
   const data = await db.query.users.findFirst({
     where: eq(users.id, user.id),
     with: {
-      projects: true,
+      projects: {
+        with: {
+          pages: {
+            with: {
+              author: true,
+            },
+          },
+        },
+      },
     },
   });
 
-  return data?.projects?.map(mapDtoToProject) || [];
+  return data?.projects?.map(mapDtoToProjectWithPages) || [];
 };
 
 export const getProjectWithTickets = async (projectId: number) => {
@@ -50,6 +58,27 @@ export const getProjectWithTickets = async (projectId: number) => {
     });
 
     return data ? mapDtoToProjectWithTickets(data) : null;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+};
+
+export const getProjectWithPages = async (projectId: number) => {
+  try {
+    const data = await db.query.projects.findFirst({
+      with: {
+        properties: true,
+        pages: {
+          with: {
+            author: true,
+          },
+        },
+      },
+      where: eq(projects.id, projectId),
+    });
+
+    return data ? mapDtoToProjectWithPages(data) : null;
   } catch (e) {
     console.error(e);
     return null;

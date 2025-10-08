@@ -1,5 +1,6 @@
 import type { InferSelectModel } from "drizzle-orm";
 import {
+  pages,
   projects,
   properties,
   propertyInstances,
@@ -8,10 +9,16 @@ import {
 } from "@/db/schema";
 import type { Ticket } from "@/types/ticket";
 import type { User } from "@/types/user";
-import type { Project, ProjectWithTickets } from "@/types/project";
+import type {
+  Project,
+  ProjectWithPages,
+  ProjectWithTickets,
+} from "@/types/project";
 import type { IconName } from "lucide-react/dynamic";
+import type { Page, PageWithContent } from "@/types/page";
 
 type DtoTicket = InferSelectModel<typeof tickets>;
+type DtoPage = InferSelectModel<typeof pages>;
 type DtoUser = InferSelectModel<typeof users>;
 type DtoProject = InferSelectModel<typeof projects>;
 type DtoPropertyInstance = InferSelectModel<typeof propertyInstances>;
@@ -79,4 +86,37 @@ export const mapDtoToProjectWithTickets = (
     settings: property.settings as never,
     showOnCard: property.showOnTicketCard || false,
   })),
+});
+
+export const mapDtoToProjectWithPages = (
+  dto: DtoProject & {
+    pages: (DtoPage & {
+      author: DtoUser;
+    })[];
+  },
+): ProjectWithPages => ({
+  id: dto.id,
+  name: dto.name,
+  description: dto.description,
+  emoji: dto.emoji,
+  pages: dto.pages.map(mapDtoToPage),
+  properties: [],
+});
+
+export const mapDtoToPage = (dto: DtoPage & { author: DtoUser }): Page => ({
+  id: dto.id,
+  name: dto.name,
+  emoji: dto.emoji,
+  description: dto.description,
+  author: mapDtoToUser(dto.author),
+  createdAt: dto.createdAt,
+  updatedAt: dto.updatedAt,
+  deletedAt: dto.deletedAt,
+});
+
+export const mapDtoToPageWithContent = (
+  dto: DtoPage & { author: DtoUser },
+): PageWithContent => ({
+  ...mapDtoToPage(dto),
+  content: dto.text,
 });
