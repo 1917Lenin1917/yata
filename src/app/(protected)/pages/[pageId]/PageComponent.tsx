@@ -37,10 +37,10 @@ export default function PageComponent({ page }: Props) {
   }, [debouncedContent]);
 
   return (
-    <div className={"w-full max-w-[800px] mt-16"}>
+    <div className={"m-container mt-16"}>
       <Input
         autoFocus={name.length === 0}
-        className="border-none bg-background! ring-0! text-5xl! h-14! p-0! px-3! shadow-none! w-full"
+        className="border-none bg-background! ring-0! text-5xl! h-[1.5lh]! p-0! px-3! shadow-none! w-full"
         placeholder={t("page.empty")}
         value={name}
         onChange={(e) => setName(e.target.value)}

@@ -1,5 +1,5 @@
 import ProjectComponent from "./Project";
-import { getProjectWithTickets } from "@/services/project";
+import { getProjectWithPages, getProjectWithTickets } from "@/services/project";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
@@ -9,7 +9,7 @@ interface Props {
 
 export default async function ProjectPage(props: Props) {
   const params = await props.params;
-  const project = await getProjectWithTickets(Number(params.projectId));
+  const project = await getProjectWithPages(Number(params.projectId));
 
   if (!project) notFound();
 

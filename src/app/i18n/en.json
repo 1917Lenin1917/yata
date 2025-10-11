@@ -35,6 +35,7 @@
     "sidebar": {
       "favorites": "Favorites",
       "projects": "Projects",
+      "table": "Table",
       "create_project": "Create a new project"
     },
     "property": {
@@ -78,6 +79,11 @@
       "neutral": "Neutral",
       "slate": "Slate",
       "zinc": "Zinc"
+    },
+    "time": {
+      "updated": "updated",
+      "justNow": "just now",
+      "unknown": "updated — unknown"
     }
   }
 }

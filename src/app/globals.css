@@ -123,3 +123,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+@utility m-container {
+  @apply mx-auto w-full px-4 sm:px-6 md:px-8;
+  max-width: clamp(680px, 92vw, 900px);
+}

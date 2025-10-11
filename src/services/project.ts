@@ -83,7 +83,7 @@ export const getCurrentUserProjects = async () => {
 
 export const getProjectWithTickets = async (projectId: number) => {
   const author = await getCurrentUser();
-  if (!author) return;
+  if (!author) return null;
 
   try {
     const data = await db.query.projects.findFirst({
@@ -118,29 +118,37 @@ export const getProjectWithTickets = async (projectId: number) => {
   }
 };
 
-// export const getProjectWithPages = async (projectId: number) => {
-//   try {
-//     const data = await db.query.projects.findFirst({
-//       with: {
-//         properties: true,
-//         pages: {
-//           with: {
-//             author: true,
-//           },
-//         },
-//         userFavoriteProjects: {
-//           where: eq(userFavoriteProjects.userId, currentUs.id),
-//         },
-//       },
-//       where: eq(projects.id, projectId),
-//     });
-//
-//     return data ? mapDtoToProjectWithPages(data) : null;
-//   } catch (e) {
-//     console.error(e);
-//     return null;
-//   }
-// };
+export const getProjectWithPages = async (projectId: number) => {
+  const author = await getCurrentUser();
+  if (!author) return null;
+
+  try {
+    const data = await db.query.projects.findFirst({
+      with: {
+        properties: true,
+        pages: {
+          with: {
+            author: true,
+          },
+        },
+        userFavoriteProjects: {
+          where: eq(userFavoriteProjects.userId, author.id),
+        },
+      },
+      where: eq(projects.id, projectId),
+    });
+
+    return data
+      ? mapDtoToProjectWithPages({
+          ...data,
+          isFavorite: data.userFavoriteProjects.length > 0,
+        })
+      : null;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+};
 
 interface CreateNewProjectPayload {
   name: string;
