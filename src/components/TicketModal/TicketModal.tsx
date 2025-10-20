@@ -1,5 +1,7 @@
 "use client";
 
+import dynamic from "next/dynamic";
+
 import {
   Dialog,
   DialogContent,
@@ -30,7 +32,9 @@ import {
 } from "@/services/project";
 import type { Property } from "@/types/property";
 import { type EditorEvents } from "@tiptap/react";
-import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
+const SimpleEditor = dynamic(
+  () => import("@/components/tiptap-templates/simple/simple-editor"),
+);
 import {
   DropdownMenu,
   DropdownMenuContent,

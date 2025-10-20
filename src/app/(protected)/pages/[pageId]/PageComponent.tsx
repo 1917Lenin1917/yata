@@ -1,5 +1,7 @@
 "use client";
 
+import dynamic from "next/dynamic";
+
 import type { PageWithContent } from "@/types/page";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "react-i18next";
@@ -7,7 +9,9 @@ import { useEffect, useState } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { updatePageContent, updatePageName } from "@/services/pages";
 import { useRouter } from "next/navigation";
-import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
+const SimpleEditor = dynamic(
+  () => import("@/components/tiptap-templates/simple/simple-editor"),
+);
 import type { EditorEvents } from "@tiptap/react";
 
 interface Props {
