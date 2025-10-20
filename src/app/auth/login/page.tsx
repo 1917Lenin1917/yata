@@ -22,10 +22,42 @@ export default function LoginPage() {
     toast.error("Invalid credentials");
   };
 
+  const googleAction = async () => {
+    const response = await signIn("google", {
+      redirect: false,
+      redirectTo: "/projects",
+    });
+
+    if (response.url) {
+      router.push(response.url);
+      return;
+    }
+
+    toast.error("Unknown error");
+  };
+
+  const githubAction = async () => {
+    const response = await signIn("github", {
+      redirect: false,
+      redirectTo: "/projects",
+    });
+
+    if (response.url) {
+      router.push(response.url);
+      return;
+    }
+
+    toast.error("Unknown error");
+  };
+
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
-        <LoginForm credentialsAction={credentialsAction} />
+      <div className="w-full max-w-md">
+        <LoginForm
+          credentialsAction={credentialsAction}
+          googleAction={googleAction}
+          githubAction={githubAction}
+        />
       </div>
     </div>
   );

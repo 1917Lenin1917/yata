@@ -4,14 +4,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { type ComponentProps } from "react";
 import Link from "next/link";
+import GoogleIcon from "@/components/icons/GoogleIcon";
+import GithubIcon from "../icons/GithubIcon";
 
 interface Props extends ComponentProps<"div"> {
   credentialsAction(formData: FormData): void;
+  googleAction(): void;
+  githubAction(): void;
 }
 
-export default function SignUpForm({ credentialsAction }: Props) {
+export default function SignUpForm({
+  credentialsAction,
+  googleAction,
+  githubAction,
+}: Props) {
   return (
-    <Card className="w-full max-w-sm">
+    <Card>
       <CardHeader className="flex justify-center">
         <CardTitle>Get started for free!</CardTitle>
       </CardHeader>
@@ -53,9 +61,26 @@ export default function SignUpForm({ credentialsAction }: Props) {
               />
             </div>
           </div>
-          <Button type="submit" className="w-full mt-4">
+          <Button type="submit" className="w-full mt-4 mb-3 cursor-pointer">
             Sign Up
           </Button>
+
+          <div className={"flex flex-wrap gap-2"}>
+            <Button
+              type="button"
+              onClick={googleAction}
+              className={"grow cursor-pointer"}
+            >
+              <GoogleIcon /> Sign up with Google
+            </Button>
+            <Button
+              type="button"
+              onClick={githubAction}
+              className={"grow cursor-pointer"}
+            >
+              <GithubIcon /> Sign up with Github
+            </Button>
+          </div>
         </form>
         <div className="mt-4 text-center text-sm">
           Already have an account?{" "}

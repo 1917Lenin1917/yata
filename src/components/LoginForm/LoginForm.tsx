@@ -11,12 +11,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { ComponentProps } from "react";
 import Link from "next/link";
+import GoogleIcon from "@/components/icons/GoogleIcon";
+import GithubIcon from "@/components/icons/GithubIcon";
 
 interface Props extends ComponentProps<"div"> {
   credentialsAction(formData: FormData): void;
+  googleAction(): void;
+  githubAction(): void;
 }
 
-export function LoginForm({ className, credentialsAction, ...props }: Props) {
+export function LoginForm({
+  className,
+  credentialsAction,
+  googleAction,
+  githubAction,
+  ...props
+}: Props) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -59,9 +69,26 @@ export function LoginForm({ className, credentialsAction, ...props }: Props) {
                 />
               </div>
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full cursor-pointer">
                   Login
                 </Button>
+
+                <div className={"flex flex-wrap gap-2"}>
+                  <Button
+                    type="button"
+                    onClick={googleAction}
+                    className={"grow cursor-pointer"}
+                  >
+                    <GoogleIcon /> Sign in with Google
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={githubAction}
+                    className={"grow cursor-pointer"}
+                  >
+                    <GithubIcon /> Sign in with Github
+                  </Button>
+                </div>
               </div>
             </div>
             <div className="mt-4 text-center text-sm">

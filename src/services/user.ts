@@ -25,6 +25,14 @@ export const getUser = async (
   return samePassword ? mapDtoToUser(user) : null;
 };
 
+export const getUserByEmail = async (email: string): Promise<User | null> => {
+  const user = await db.query.users.findFirst({
+    where: eq(users.email, email),
+  });
+
+  return user ? mapDtoToUser(user) : null;
+};
+
 export async function getCurrentUser() {
   const session = await auth();
   if (!session?.user?.email) return null;

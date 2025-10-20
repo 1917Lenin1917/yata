@@ -1,26 +1,54 @@
 import NextAuth from "next-auth";
-import { getUser } from "@/services/user";
+import { createUser, getUser, getUserByEmail } from "@/services/user";
 import authConfig from "./auth.config";
+
+async function getUserByEmailAction(email: string) {
+  "use server";
+  return await getUserByEmail(email);
+}
 
 async function getUserAction(email: string, password: string) {
   "use server";
   return await getUser(email, password);
 }
 
-export const { handlers, auth } = NextAuth({
-  ...authConfig,
-  // real credential check that hits the DB
-  providers: [
-    {
-      ...authConfig.providers[0],
-      authorize: async (credentials) => {
-        const user = await getUserAction(
-          (credentials.email as string) || "",
-          (credentials.password as string) || "",
-        );
+async function createUserAction(
+  email: string,
+  firstName: string,
+  lastName: string,
+) {
+  "use server";
+  return await createUser({
+    email,
+    firstName,
+    lastName,
+    password: "google",
+  });
+}
 
-        return user;
-      },
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
+  callbacks: {
+    async signIn({ user, account }) {
+      // if (account?.provider !== "google") return true;
+      if (!user.email) return false;
+
+      if (account?.provider === "credentials") {
+        if (!("password" in user)) return false;
+
+        const existing = await getUserAction(
+          user.email,
+          user.password as string,
+        );
+        return !!existing;
+      } else {
+        const existing = await getUserByEmailAction(user.email);
+        if (!existing) {
+          const [firstName, lastName] = user.name?.split(" ") || "";
+          await createUserAction(user.email, firstName || "", lastName || "");
+        }
+        return true;
+      }
     },
-  ],
+  },
 });

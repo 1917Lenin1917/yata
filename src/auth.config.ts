@@ -1,11 +1,34 @@
-// auth.config.ts  ––––– Edge‑safe
-import Credentials from "@auth/core/providers/credentials";
 import type { NextAuthConfig } from "next-auth";
+
+import GitHub from "next-auth/providers/github";
+import Google from "next-auth/providers/google";
+import Credentials from "next-auth/providers/credentials";
 
 export default {
   providers: [
+    GitHub({
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    }),
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
     Credentials({
-      credentials: { email: {}, password: {} },
+      credentials: {
+        email: { label: "email" },
+        password: { label: "password" },
+      },
+      authorize: async (creds) => {
+        if (!creds?.email || !creds?.password) return null;
+        return {
+          id: -1,
+          email: creds.email as string,
+          password: creds.password,
+          firstName: "",
+          lastName: "",
+        };
+      },
     }),
   ],
   trustHost: true,
