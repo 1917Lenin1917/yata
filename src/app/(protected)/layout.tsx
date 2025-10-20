@@ -14,7 +14,9 @@ export default async function ProtectedLayout({ children }: Props) {
     <SidebarProvider defaultWidth={sidebarWidth?.value}>
       <AppSidebar />
       <main
-        className={"w-[calc(100vw-var(--sidebar-width))] justify-items-center"}
+        className={
+          "w-full md:w-[calc(100vw-var(--sidebar-width))] justify-items-center"
+        }
       >
         {children}
       </main>

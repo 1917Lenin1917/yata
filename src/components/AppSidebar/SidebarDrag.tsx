@@ -55,7 +55,7 @@ export default function SidebarDrag({
       localStorage.setItem("yata-sidebar-width", `${finalWidth}px`);
     }
     if (saveToCookie) {
-      document.cookie = `yata-sidebar-width=${finalWidth}px`;
+      document.cookie = `yata-sidebar-width=${finalWidth}px; path=/;`;
     }
   };
 

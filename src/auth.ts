@@ -1,6 +1,12 @@
 import NextAuth from "next-auth";
-import { createUser, getUser, getUserByEmail } from "@/services/user";
+import {
+  createUser,
+  getUser,
+  getUserByEmail,
+  updateUserAvatar,
+} from "@/services/user";
 import authConfig from "./auth.config";
+import { pickExtensionFromContentType } from "@/lib/extensionFromContentType";
 
 async function getUserByEmailAction(email: string) {
   "use server";
@@ -16,21 +22,39 @@ async function createUserAction(
   email: string,
   firstName: string,
   lastName: string,
+  avatarLink?: string,
 ) {
   "use server";
-  return await createUser({
+
+  const user = await createUser({
     email,
     firstName,
     lastName,
-    password: "google",
+    password: "oauth",
+    isOAuth: true,
   });
+
+  if (avatarLink) {
+    const response = await fetch(avatarLink, { cache: "no-store" });
+    const avatarBlob = await response.blob();
+    const contentType =
+      response.headers.get("content-type") ||
+      avatarBlob.type ||
+      "application/octet-stream";
+    const extension = pickExtensionFromContentType(contentType);
+
+    await updateUserAvatar(
+      user.id,
+      `${user.id}-oauth-avatar.${extension}`,
+      avatarBlob,
+    );
+  }
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   callbacks: {
     async signIn({ user, account }) {
-      // if (account?.provider !== "google") return true;
       if (!user.email) return false;
 
       if (account?.provider === "credentials") {
@@ -45,7 +69,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const existing = await getUserByEmailAction(user.email);
         if (!existing) {
           const [firstName, lastName] = user.name?.split(" ") || "";
-          await createUserAction(user.email, firstName || "", lastName || "");
+          await createUserAction(
+            user.email,
+            firstName || "",
+            lastName || "",
+            user.image ?? undefined,
+          );
         }
         return true;
       }

@@ -11,27 +11,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { ComponentProps } from "react";
 import Link from "next/link";
-import GoogleIcon from "@/components/icons/GoogleIcon";
-import GithubIcon from "@/components/icons/GithubIcon";
+import OAuthBlock from "@/components/OAuthBlock";
 
 interface Props extends ComponentProps<"div"> {
   credentialsAction(formData: FormData): void;
-  googleAction(): void;
-  githubAction(): void;
+  oauthAction(provider: string): void;
 }
 
 export function LoginForm({
   className,
   credentialsAction,
-  googleAction,
-  githubAction,
+  oauthAction,
   ...props
 }: Props) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
+          <CardTitle>Sign in to your account</CardTitle>
           <CardDescription>
             Enter your email below to login to your account
           </CardDescription>
@@ -70,25 +67,13 @@ export function LoginForm({
               </div>
               <div className="flex flex-col gap-3">
                 <Button type="submit" className="w-full cursor-pointer">
-                  Login
+                  Sign in
                 </Button>
 
-                <div className={"flex flex-wrap gap-2"}>
-                  <Button
-                    type="button"
-                    onClick={googleAction}
-                    className={"grow cursor-pointer"}
-                  >
-                    <GoogleIcon /> Sign in with Google
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={githubAction}
-                    className={"grow cursor-pointer"}
-                  >
-                    <GithubIcon /> Sign in with Github
-                  </Button>
+                <div className={"self-center text-muted-foreground"}>
+                  or sign in with
                 </div>
+                <OAuthBlock oauthAction={oauthAction} />
               </div>
             </div>
             <div className="mt-4 text-center text-sm">

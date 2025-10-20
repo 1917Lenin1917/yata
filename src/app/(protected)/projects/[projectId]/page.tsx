@@ -2,6 +2,7 @@ import ProjectComponent from "./Project";
 import { getProjectWithPages, getProjectWithTickets } from "@/services/project";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 interface Props {
   params: Promise<{ projectId: string }>;
@@ -14,9 +15,14 @@ export default async function ProjectPage(props: Props) {
   if (!project) notFound();
 
   return (
-    <div className={"w-full max-w-[1400px] mt-16"}>
-      <ProjectComponent project={project}></ProjectComponent>
-    </div>
+    <>
+      <header className={"h-[44px] w-full p-2 sticky top-0 bg-background z-50"}>
+        <SidebarTrigger />
+      </header>
+      <div className={"w-full max-w-[1400px] mt-16"}>
+        <ProjectComponent project={project}></ProjectComponent>
+      </div>
+    </>
   );
 }
 

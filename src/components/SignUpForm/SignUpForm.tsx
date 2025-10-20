@@ -4,20 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { type ComponentProps } from "react";
 import Link from "next/link";
-import GoogleIcon from "@/components/icons/GoogleIcon";
-import GithubIcon from "../icons/GithubIcon";
+import OAuthBlock from "@/components/OAuthBlock";
 
 interface Props extends ComponentProps<"div"> {
   credentialsAction(formData: FormData): void;
-  googleAction(): void;
-  githubAction(): void;
+  oauthAction(provider: string): void;
 }
 
-export default function SignUpForm({
-  credentialsAction,
-  googleAction,
-  githubAction,
-}: Props) {
+export default function SignUpForm({ credentialsAction, oauthAction }: Props) {
   return (
     <Card>
       <CardHeader className="flex justify-center">
@@ -65,22 +59,10 @@ export default function SignUpForm({
             Sign Up
           </Button>
 
-          <div className={"flex flex-wrap gap-2"}>
-            <Button
-              type="button"
-              onClick={googleAction}
-              className={"grow cursor-pointer"}
-            >
-              <GoogleIcon /> Sign up with Google
-            </Button>
-            <Button
-              type="button"
-              onClick={githubAction}
-              className={"grow cursor-pointer"}
-            >
-              <GithubIcon /> Sign up with Github
-            </Button>
+          <div className={"text-center mb-4 text-muted-foreground"}>
+            or sign up with
           </div>
+          <OAuthBlock oauthAction={oauthAction} />
         </form>
         <div className="mt-4 text-center text-sm">
           Already have an account?{" "}

@@ -29,7 +29,7 @@ interface Props {
   projects: ProjectWithPages[];
 }
 export default function AppSidebarInner({ user, favorites, projects }: Props) {
-  const { ref } = useSidebar();
+  const { ref, open, isMobile } = useSidebar();
 
   return (
     <>
@@ -83,12 +83,14 @@ export default function AppSidebarInner({ user, favorites, projects }: Props) {
           </SidebarGroup>
         </SidebarFooter>
       </Sidebar>
-      <SidebarDrag
-        minWidth={260}
-        maxWidth={500}
-        sidebarRef={ref}
-        saveToCookie
-      />
+      {open && !isMobile && (
+        <SidebarDrag
+          minWidth={260}
+          maxWidth={500}
+          sidebarRef={ref}
+          saveToCookie
+        />
+      )}
     </>
   );
 }

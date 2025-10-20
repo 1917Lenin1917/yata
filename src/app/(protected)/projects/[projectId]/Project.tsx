@@ -46,7 +46,9 @@ export default function ProjectPage({ project }: Props) {
         <div>
           <div className={"text-4xl relative flex justify-between"}>
             <DisplaySelectEmoji
-              className={"absolute -translate-x-[100%]"}
+              className={
+                "absolute md:-translate-x-[100%] -translate-y-[120%] translate-x-0"
+              }
               currentEmoji={project.emoji}
               handleUpdateEmoji={handleUpdateEmoji}
             />

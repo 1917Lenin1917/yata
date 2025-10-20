@@ -44,22 +44,8 @@ export default function SignUpPage() {
     }
   };
 
-  const googleAction = async () => {
-    const response = await signIn("google", {
-      redirect: false,
-      redirectTo: "/projects",
-    });
-
-    if (response.url) {
-      router.push(response.url);
-      return;
-    }
-
-    toast.error("Unknown error");
-  };
-
-  const githubAction = async () => {
-    const response = await signIn("github", {
+  const oauthAction = async (provider: string) => {
+    const response = await signIn(provider, {
       redirect: false,
       redirectTo: "/projects",
     });
@@ -74,11 +60,10 @@ export default function SignUpPage() {
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-sm">
         <SignUpForm
           credentialsAction={credentialsAction}
-          googleAction={googleAction}
-          githubAction={githubAction}
+          oauthAction={oauthAction}
         />
       </div>
     </div>

@@ -49,16 +49,22 @@ type CreateUserPayload = {
   firstName: string;
   lastName: string;
   password: string;
+  isOAuth?: boolean;
 };
-export const createUser = async (payload: CreateUserPayload): Promise<void> => {
+export const createUser = async (payload: CreateUserPayload): Promise<User> => {
   const hashedPassword = await hashPassword(payload.password);
 
-  await db.insert(users).values({
-    email: payload.email,
-    firstName: payload.firstName,
-    lastName: payload.lastName,
-    password: hashedPassword,
-  });
+  const [user] = await db
+    .insert(users)
+    .values({
+      email: payload.email,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      password: payload.isOAuth ? payload.password : hashedPassword,
+    })
+    .returning();
+
+  return mapDtoToUser(user);
 };
 
 export async function updateUserName(
