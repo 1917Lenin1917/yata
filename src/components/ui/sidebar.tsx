@@ -24,6 +24,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { type ComponentRef, type RefObject, useRef } from "react";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -40,6 +41,7 @@ type SidebarContextProps = {
   setOpenMobile: (open: boolean) => void;
   isMobile: boolean;
   toggleSidebar: () => void;
+  ref: RefObject<HTMLDivElement | null>;
 };
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null);
@@ -60,14 +62,17 @@ function SidebarProvider({
   className,
   style,
   children,
+  defaultWidth,
   ...props
 }: React.ComponentProps<"div"> & {
+  defaultWidth?: string;
   defaultOpen?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
   const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = React.useState(false);
+  const ref = useRef<ComponentRef<"div">>(null);
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -115,6 +120,7 @@ function SidebarProvider({
 
   const contextValue = React.useMemo<SidebarContextProps>(
     () => ({
+      ref,
       state,
       open,
       setOpen,
@@ -130,10 +136,11 @@ function SidebarProvider({
     <SidebarContext.Provider value={contextValue}>
       <TooltipProvider delayDuration={0}>
         <div
+          ref={ref}
           data-slot="sidebar-wrapper"
           style={
             {
-              "--sidebar-width": SIDEBAR_WIDTH,
+              "--sidebar-width": defaultWidth ?? SIDEBAR_WIDTH,
               "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
               ...style,
             } as React.CSSProperties
