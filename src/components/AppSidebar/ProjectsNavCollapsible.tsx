@@ -20,15 +20,17 @@ import {
   TableIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { ProjectWithPages } from "@/types/project";
+import type { ProjectWithNodes } from "@/types/project";
 import { createPage } from "@/services/pages";
+import { moveNode } from "@/services/nodes";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
+import type { ProjectNode } from "@/types/node";
 
 interface Props {
-  project: ProjectWithPages;
+  project: ProjectWithNodes;
 }
 
 export default function ProjectsNavCollapsible({ project }: Props) {
@@ -44,6 +46,7 @@ export default function ProjectsNavCollapsible({ project }: Props) {
     pathname?.startsWith(`/projects/${project.id}/tickets`) ?? false;
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [draggedNodeId, setDraggedNodeId] = useState<number | null>(null);
 
   const onAddPageClick = async (projectId: number) => {
     await createPage({
@@ -53,6 +56,107 @@ export default function ProjectsNavCollapsible({ project }: Props) {
       projectId,
     });
     router.refresh();
+  };
+
+  const onAddChildPageClick = async (parentId: number) => {
+    await createPage({
+      name: "",
+      description: "",
+      content: "",
+      projectId: project.id,
+      parentId,
+    });
+    router.refresh();
+  };
+
+  const allNodes = useMemo(() => {
+    const out: ProjectNode[] = [];
+    const walk = (nodes: ProjectNode[]) => {
+      for (const node of nodes) {
+        out.push(node);
+        walk(node.children);
+      }
+    };
+    walk(project.nodes);
+    return out;
+  }, [project.nodes]);
+
+  const childrenCountByParent = useMemo(() => {
+    const map = new Map<number | null, number>();
+    allNodes.forEach((node) => {
+      map.set(node.parentId, (map.get(node.parentId) ?? 0) + 1);
+    });
+    return map;
+  }, [allNodes]);
+
+  const handleDrop = async (parentId: number | null) => {
+    if (!draggedNodeId) return;
+
+    const sortOrder = childrenCountByParent.get(parentId) ?? 0;
+
+    await moveNode({
+      nodeId: draggedNodeId,
+      parentId,
+      sortOrder,
+    });
+
+    setDraggedNodeId(null);
+    router.refresh();
+  };
+
+  const renderNode = (node: ProjectNode) => {
+    const isActivePage = node.type === "page" && activePageId === node.pageId;
+    const isTicketsNode =
+      node.type === "ticket_table" &&
+      pathname?.startsWith(`/projects/${project.id}/tickets`);
+
+    return (
+      <SidebarMenuSubItem
+        key={`node-${node.id}`}
+        className={"text-sm select-none"}
+        draggable
+        onDragStart={() => setDraggedNodeId(node.id)}
+        onDragOver={(event) => event.preventDefault()}
+        onDrop={async (event) => {
+          event.preventDefault();
+          await handleDrop(node.id);
+        }}
+      >
+        <div className="flex items-center gap-1">
+          <SidebarMenuSubButton isActive={isActivePage || isTicketsNode} asChild>
+            {node.type === "ticket_table" ? (
+              <Link href={`/projects/${project.id}/tickets`}>
+                <TableIcon className="size-4" />
+                <span className={cn(!node.title && "text-muted-foreground")}>
+                  {node.title || t("sidebar.table")}
+                </span>
+              </Link>
+            ) : (
+              <Link href={`/pages/${node.pageId}`}>
+                <FileIcon className={"size-4"} />
+                <span className={cn(!node.title && "text-muted-foreground")}>
+                  {node.title || t("page.empty")}
+                </span>
+              </Link>
+            )}
+          </SidebarMenuSubButton>
+          <Button
+            variant={"ghost"}
+            className={"size-5 p-1"}
+            onClick={() => onAddChildPageClick(node.id)}
+            title={"Create child page"}
+          >
+            <PlusIcon className="size-3" />
+          </Button>
+        </div>
+
+        {!!node.children.length && (
+          <SidebarMenuSub className="ml-4">
+            {node.children.map((child) => renderNode(child))}
+          </SidebarMenuSub>
+        )}
+      </SidebarMenuSubItem>
+    );
   };
 
   return (
@@ -106,40 +210,31 @@ export default function ProjectsNavCollapsible({ project }: Props) {
         </Button>
 
         <CollapsibleContent>
-          <SidebarMenuSub>
-            <SidebarMenuSubItem>
-              <SidebarMenuSubButton isActive={isOnProjectTickets} asChild>
-                <Link href={`/projects/${project.id}/tickets`}>
-                  <TableIcon className="size-4" />
-                  <span>{t("sidebar.table")}</span>
-                </Link>
-              </SidebarMenuSubButton>
-            </SidebarMenuSubItem>
-
-            {!project.pages.length && (
+          <SidebarMenuSub
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={async (event) => {
+              event.preventDefault();
+              await handleDrop(null);
+            }}
+          >
+            {!project.nodes.length && (
               <SidebarMenuSubItem className={"text-muted-foreground text-sm"}>
                 No pages
               </SidebarMenuSubItem>
             )}
 
-            {project.pages.map((page) => (
-              <SidebarMenuSubItem
-                key={`page-${page.id}`}
-                className={"text-sm select-none"}
-              >
-                <SidebarMenuSubButton
-                  isActive={activePageId === page.id}
-                  asChild
-                >
-                  <Link href={`/pages/${page.id}`}>
-                    <FileIcon className={"size-4"} />
-                    <span className={cn(!page.name && "text-muted-foreground")}>
-                      {page.name || t("page.empty")}
-                    </span>
+            {project.nodes.map((node) => renderNode(node))}
+
+            {!project.nodes.some((node) => node.type === "ticket_table") && (
+              <SidebarMenuSubItem>
+                <SidebarMenuSubButton isActive={isOnProjectTickets} asChild>
+                  <Link href={`/projects/${project.id}/tickets`}>
+                    <TableIcon className="size-4" />
+                    <span>{t("sidebar.table")}</span>
                   </Link>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
-            ))}
+            )}
           </SidebarMenuSub>
         </CollapsibleContent>
       </SidebarMenuItem>

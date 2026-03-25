@@ -11,7 +11,8 @@
     "tcm": "npx typed-css-modules src --watch --camelCase",
     "migrate": "yarn drizzle-kit migrate",
     "generate": "yarn drizzle-kit generate",
-    "gnm": "yarn generate && yarn migrate"
+    "gnm": "yarn generate && yarn migrate",
+    "test:backend": "node --test --import tsx tests/backend/**/*.test.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
