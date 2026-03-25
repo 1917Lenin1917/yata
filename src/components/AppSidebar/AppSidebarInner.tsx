@@ -21,12 +21,12 @@ import { formatUser, getInitials } from "@/utils";
 import LogOutButton from "@/components/AppSidebar/LogOutButton";
 import SidebarDrag from "@/components/AppSidebar/SidebarDrag";
 import type { User } from "@/types/user";
-import type { ProjectWithPages } from "@/types/project";
+import type { ProjectWithNodes } from "@/types/project";
 
 interface Props {
   user: User | null;
-  favorites: ProjectWithPages[];
-  projects: ProjectWithPages[];
+  favorites: ProjectWithNodes[];
+  projects: ProjectWithNodes[];
 }
 export default function AppSidebarInner({ user, favorites, projects }: Props) {
   const { ref, open, isMobile } = useSidebar();
