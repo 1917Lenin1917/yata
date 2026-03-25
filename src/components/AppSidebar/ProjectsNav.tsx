@@ -5,14 +5,14 @@ import {
   SidebarGroupLabel,
   SidebarMenu,
 } from "@/components/ui/sidebar";
-import type { ProjectWithPages } from "@/types/project";
+import type { ProjectWithNodes } from "@/types/project";
 import NewProject from "@/components/AppSidebar/NewProject";
 import { useTranslation } from "react-i18next";
 import ProjectsNavCollapsible from "@/components/AppSidebar/ProjectsNavCollapsible";
 
 interface Props {
   groupLabel: string;
-  projects: ProjectWithPages[];
+  projects: ProjectWithNodes[];
   showCreateNewProject?: boolean;
 }
 

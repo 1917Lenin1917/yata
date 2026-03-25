@@ -73,6 +73,7 @@ export const userFavoriteProjects = sqliteTable("userFavoriteProjects", {
 
 export const pages = sqliteTable("pages", {
   id: integer().primaryKey({ autoIncrement: true }),
+  nodeId: integer().references(() => nodes.id),
   name: text().notNull(),
   description: text().notNull(),
   text: text().default("").notNull(),
@@ -90,6 +91,24 @@ export const pages = sqliteTable("pages", {
     .notNull(),
 });
 
+export const nodes = sqliteTable("nodes", {
+  id: integer().primaryKey({ autoIncrement: true }),
+  projectId: integer()
+    .references(() => projects.id)
+    .notNull(),
+  parentId: integer().references(() => nodes.id),
+  type: text({ enum: ["page", "ticket_table"] }).notNull(),
+  title: text().notNull().default(""),
+  emoji: text().notNull().default(""),
+  sortOrder: integer().notNull().default(0),
+  createdAt: text(),
+  updatedAt: text(),
+  deletedAt: text(),
+  authorId: integer()
+    .references(() => users.id)
+    .notNull(),
+});
+
 export const usersRelations = relations(users, ({ many }) => ({
   tickets: many(tickets),
   projects: many(projects),
@@ -98,6 +117,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 export const projectsRelations = relations(projects, ({ one, many }) => ({
   tickets: many(tickets),
   pages: many(pages),
+  nodes: many(nodes),
   author: one(users, {
     fields: [projects.authorId],
     references: [users.id],
@@ -114,6 +134,33 @@ export const pagesRelations = relations(pages, ({ one }) => ({
   author: one(users, {
     fields: [pages.authorId],
     references: [users.id],
+  }),
+  node: one(nodes, {
+    fields: [pages.nodeId],
+    references: [nodes.id],
+  }),
+}));
+
+export const nodesRelations = relations(nodes, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [nodes.projectId],
+    references: [projects.id],
+  }),
+  author: one(users, {
+    fields: [nodes.authorId],
+    references: [users.id],
+  }),
+  page: one(pages, {
+    fields: [nodes.id],
+    references: [pages.nodeId],
+  }),
+  parent: one(nodes, {
+    fields: [nodes.parentId],
+    references: [nodes.id],
+    relationName: "node-parent-children",
+  }),
+  children: many(nodes, {
+    relationName: "node-parent-children",
   }),
 }));
 

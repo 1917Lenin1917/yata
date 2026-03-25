@@ -1,6 +1,7 @@
 import type { Ticket } from "@/types/ticket";
 import type { IconName } from "lucide-react/dynamic";
 import type { Page } from "@/types/page";
+import type { ProjectNode } from "@/types/node";
 
 export interface Project {
   id: number;
@@ -17,6 +18,10 @@ export interface ProjectWithTickets extends Project {
 
 export interface ProjectWithPages extends Project {
   pages: Page[];
+}
+
+export interface ProjectWithNodes extends Project {
+  nodes: ProjectNode[];
 }
 
 export interface GroupByProperty {
