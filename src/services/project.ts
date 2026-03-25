@@ -16,6 +16,8 @@ import {
   mapDtoToProjectWithTickets,
 } from "@/services/mappers";
 import type { Property } from "@/types/property";
+import { getProjectNodesTree } from "@/services/nodes";
+import type { ProjectWithNodes } from "@/types/project";
 
 export const getCurrentUserFavoriteProjects = async () => {
   const user = await getCurrentUser();
@@ -39,13 +41,19 @@ export const getCurrentUserFavoriteProjects = async () => {
     },
   });
 
-  return (
+  const projects =
     data?.map((fav) =>
       mapDtoToProjectWithPages({
         ...fav.project,
         isFavorite: fav.project.userFavoriteProjects.length > 0,
       }),
-    ) || []
+    ) || [];
+
+  return Promise.all(
+    projects.map(async (project) => ({
+      ...project,
+      nodes: await getProjectNodesTree(project.id),
+    })),
   );
 };
 
@@ -71,13 +79,19 @@ export const getCurrentUserProjects = async () => {
     },
   });
 
-  return (
+  const projects =
     data?.projects?.map((project) =>
       mapDtoToProjectWithPages({
         ...project,
         isFavorite: project.userFavoriteProjects.length > 0,
       }),
-    ) || []
+    ) || [];
+
+  return Promise.all(
+    projects.map(async (project) => ({
+      ...project,
+      nodes: await getProjectNodesTree(project.id),
+    })),
   );
 };
 
@@ -150,6 +164,20 @@ export const getProjectWithPages = async (projectId: number) => {
   }
 };
 
+export const getProjectWithNodes = async (
+  projectId: number,
+): Promise<ProjectWithNodes | null> => {
+  const base = await getProjectWithPages(projectId);
+  if (!base) return null;
+
+  const nodes = await getProjectNodesTree(projectId);
+
+  return {
+    ...base,
+    nodes,
+  };
+};
+
 interface CreateNewProjectPayload {
   name: string;
   description: string;
@@ -164,6 +192,15 @@ export const updateProjectEmoji = async (
     .update(projects)
     .set({
       emoji: newEmoji,
+    })
+    .where(eq(projects.id, projectId));
+};
+
+export const updateProjectName = async (projectId: number, newName: string) => {
+  await db
+    .update(projects)
+    .set({
+      name: newName,
     })
     .where(eq(projects.id, projectId));
 };

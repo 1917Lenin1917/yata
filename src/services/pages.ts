@@ -2,29 +2,35 @@
 
 import { db } from "@/db/drizzle";
 import { pages } from "@/db/schema";
-import { getCurrentUser } from "@/services/user";
 import { eq } from "drizzle-orm";
 import { mapDtoToPageWithContent } from "@/services/mappers";
+import { createNode } from "@/services/nodes";
 
 interface CreatePageParams {
   projectId: number;
+  parentId?: number | null;
   name: string;
   description: string;
   content: string;
 }
 export const createPage = async (payload: CreatePageParams) => {
-  const author = await getCurrentUser();
-  if (!author) return; // TODO: throw err
-
-  await db.insert(pages).values({
+  const node = await createNode({
     projectId: payload.projectId,
-    authorId: author.id,
-    name: payload.name,
-    description: payload.description,
-    text: payload.content,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    parentId: payload.parentId ?? null,
+    type: "page",
+    title: payload.name,
   });
+
+  if (!node) return;
+
+  await db
+    .update(pages)
+    .set({
+      description: payload.description,
+      text: payload.content,
+      updatedAt: new Date().toISOString(),
+    })
+    .where(eq(pages.nodeId, node.id));
 };
 
 export const getPage = async (pageId: number) => {
